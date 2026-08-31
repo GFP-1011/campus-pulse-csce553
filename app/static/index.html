@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Campus Pulse</title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
+    <header>
+      <div><strong>Campus Pulse</strong><span>Share what is happening on campus.</span></div>
+      <button id="logout" class="secondary hidden">Log out</button>
+    </header>
+    <div class="notice">CSCE 553 class baseline · fake data only · not a production service</div>
+
+    <main>
+      <section id="auth-view" class="auth-grid">
+        <form id="login-form" class="card">
+          <h2>Log in</h2>
+          <label>Email<input name="email" type="email" required></label>
+          <label>Password<input name="password" type="password" required></label>
+          <button>Log in</button>
+        </form>
+        <form id="register-form" class="card">
+          <h2>Create account</h2>
+          <label>Display name<input name="display_name" required maxlength="80"></label>
+          <label>Email<input name="email" type="email" required></label>
+          <label>Password<input name="password" type="password" minlength="8" required></label>
+          <button>Create account</button>
+        </form>
+      </section>
+
+      <section id="app-view" class="hidden">
+        <div class="layout">
+          <aside>
+            <div class="card">
+              <h2>Find people</h2>
+              <form id="search-form" class="inline"><input name="q" placeholder="Name or email"><button>Search</button></form>
+              <div id="people"></div>
+            </div>
+            <div class="card"><h2>Friends</h2><div id="friends"></div></div>
+          </aside>
+          <section>
+            <form id="post-form" class="card composer">
+              <h2 id="welcome">Your feed</h2>
+              <textarea name="body" maxlength="2000" required placeholder="Share an update..."></textarea>
+              <button>Post message</button>
+            </form>
+            <div id="posts"></div>
+          </section>
+        </div>
+      </section>
+      <div id="toast" role="status"></div>
+    </main>
+    <script src="/static/app.js"></script>
+  </body>
+</html>
+

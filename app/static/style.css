@@ -1,0 +1,31 @@
+:root { color-scheme: light; font-family: Inter, system-ui, sans-serif; color: #172033; background: #f4f6fa; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+header { display: flex; justify-content: space-between; align-items: center; padding: 1rem max(1rem, calc((100% - 1050px)/2)); background: #253b80; color: white; }
+header strong { font-size: 1.35rem; margin-right: .8rem; }
+header span { opacity: .8; }
+.notice { text-align: center; padding: .55rem; color: #604500; background: #fff1b8; font-size: .9rem; }
+main { max-width: 1050px; margin: 2rem auto; padding: 0 1rem; }
+.auth-grid, .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.layout { grid-template-columns: 320px 1fr; align-items: start; }
+.card { background: white; border: 1px solid #dde2ec; border-radius: 10px; padding: 1.2rem; margin-bottom: 1rem; box-shadow: 0 2px 8px #1b2a4a10; }
+h2 { font-size: 1.05rem; margin: 0 0 1rem; }
+label { display: block; margin: .7rem 0; font-size: .9rem; }
+input, textarea { width: 100%; padding: .65rem; margin-top: .3rem; border: 1px solid #bdc5d5; border-radius: 6px; font: inherit; }
+textarea { min-height: 90px; resize: vertical; }
+button { padding: .6rem .9rem; border: 0; border-radius: 6px; background: #3156c8; color: white; cursor: pointer; }
+button:hover { background: #2445a8; }
+button.secondary { background: #ffffff20; border: 1px solid #ffffff80; }
+.inline { display: flex; gap: .4rem; }
+.inline input { margin: 0; }
+.person { display: flex; justify-content: space-between; align-items: center; gap: .5rem; border-top: 1px solid #edf0f5; padding: .65rem 0; }
+.person small { display: block; color: #647086; }
+.post header { background: transparent; color: inherit; padding: 0; }
+.post small { color: #69758a; }
+.post p { white-space: pre-wrap; line-height: 1.5; }
+.actions { display: flex; gap: .5rem; }
+.actions button { background: #edf1fc; color: #29489e; }
+.hidden { display: none !important; }
+#toast { position: fixed; right: 1rem; bottom: 1rem; max-width: 360px; background: #172033; color: white; padding: .8rem 1rem; border-radius: 7px; display: none; }
+@media (max-width: 720px) { .auth-grid, .layout { grid-template-columns: 1fr; } header span { display: none; } }
+

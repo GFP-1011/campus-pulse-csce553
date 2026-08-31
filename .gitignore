@@ -1,0 +1,9 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+.env
+*.db
+htmlcov/
+.coverage
+CSCE553-001-202720_ M1 - Baseline System _ Home.pdf
