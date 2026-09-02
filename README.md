@@ -2,6 +2,8 @@
 
 Campus Pulse is a small social-media application built for **CSCE 553 M1 — Baseline System (Option A)**. Users can register, log in, find and add friends, publish and edit messages, read the feed, and like messages. The browser UI and external clients use the same JSON API. This is a class baseline, **not a production service**, and it contains fake data only.
 
+> **Render cold-start notice:** This application uses Render's free hosting tier. After a period of inactivity, the first visit may take approximately one minute while the service starts. If the page does not load immediately, please wait about one minute and refresh it.
+
 ## Architecture
 
 ```text
@@ -92,6 +94,8 @@ All bodies and responses are JSON. Protected endpoints require `Authorization: B
 
 Set the deployed base URL (with no trailing slash):
 
+Because the Render free instance may be asleep, allow approximately one minute for the first request to complete before running the remaining examples.
+
 ```bash
 BASE_URL=https://campus-pulse-csce553.onrender.com
 ```
@@ -156,6 +160,8 @@ curl -s -X POST "$BASE_URL/api/auth/logout" \
 - Hosted application: <https://campus-pulse-csce553.onrender.com>
 - GitHub repository: <https://github.com/GFP-1011/campus-pulse-csce553>
 - Evidence note: [docs/M1-evidence.md](docs/M1-evidence.md)
+
+The hosted application may require approximately one minute to start on the first visit because it runs on Render's free tier. Refresh the page after waiting if necessary.
 
 ## Course-use notice
 
