@@ -49,7 +49,7 @@ pytest -q
 2. Create a GitHub repository and push this project. Confirm `.env` is not committed.
 3. In Render, create a Blueprint/Web Service from that repository. `render.yaml` supplies the build, start, and health-check settings.
 4. Set Render's secret `DATABASE_URL` environment variable to the Supabase connection string. The application accepts both `postgresql://...` and `postgres://...` and selects the psycopg driver automatically.
-5. Deploy and check `https://YOUR-APP.onrender.com/health` and `/docs`.
+5. Deploy and check <https://campus-pulse-csce553.onrender.com/health> and <https://campus-pulse-csce553.onrender.com/docs>.
 6. Create the three fake demo users. One option is to run the seed command locally while `.env` points to the Supabase database:
 
 ```bash
@@ -62,13 +62,13 @@ The application creates its tables on startup. For a course baseline this keeps 
 
 ## Demo accounts
 
-Replace the password below with the fake password used during seeding before submission.
-
 | Email | Display name | Password |
 |---|---|---|
-| `alice@example.com` | Alice Demo | `REPLACE_ME` |
-| `bob@example.com` | Bob Demo | `REPLACE_ME` |
-| `carol@example.com` | Carol Demo | `REPLACE_ME` |
+| `alice.demo@campuspulse.example` | Alice Demo | `CampusPulseDemo!2026` |
+| `bob.demo@campuspulse.example` | Bob Demo | `CampusPulseDemo!2026` |
+| `carol.demo@campuspulse.example` | Carol Demo | `CampusPulseDemo!2026` |
+
+These are fake course-only credentials. Do not reuse this password for any real account.
 
 ## API
 
@@ -93,7 +93,7 @@ All bodies and responses are JSON. Protected endpoints require `Authorization: B
 Set the deployed base URL (with no trailing slash):
 
 ```bash
-BASE_URL=https://YOUR-APP.onrender.com
+BASE_URL=https://campus-pulse-csce553.onrender.com
 ```
 
 Health check:
@@ -107,7 +107,7 @@ Register (use a new fake email) or log in:
 ```bash
 curl -s -X POST "$BASE_URL/api/auth/login" \
   -H 'Content-Type: application/json' \
-  -d '{"email":"alice@example.com","password":"REPLACE_ME"}'
+  -d '{"email":"alice.demo@campuspulse.example","password":"CampusPulseDemo!2026"}'
 ```
 
 Copy the returned `access_token`, then set it without committing it anywhere:
@@ -141,17 +141,22 @@ curl -s -X POST "$BASE_URL/api/auth/logout" \
 
 ## Submission checklist
 
-- [ ] Public HTTPS UI loads outside the developer's laptop.
-- [ ] `/health` succeeds against the public URL.
-- [ ] GitHub pushes trigger Render deployments.
-- [ ] Supabase PostgreSQL is configured; deployed data survives refresh/restart.
-- [ ] All three demo users can log in through the UI and API.
-- [ ] README passwords and `BASE_URL` placeholders are replaced.
-- [ ] No `.env`, database password, real password, or token is committed.
-- [ ] All README curl examples work against the public URL.
-- [ ] `docs/M1-evidence.md` contains the required screenshot and terminal output.
+- [x] Public HTTPS UI loads outside the developer's laptop.
+- [x] `/health` succeeds against the public URL.
+- [x] GitHub repository is connected to the deployed Render service.
+- [x] Supabase PostgreSQL is configured; deployed data persists after refresh.
+- [x] All three demo users can log in through the UI and API.
+- [x] README demo credentials and `BASE_URL` are complete.
+- [x] No `.env`, database password, real password, or bearer token is committed.
+- [x] All README curl examples work against the public URL.
+- [x] `docs/M1-evidence.md` contains the required screenshot and terminal output.
+
+## Submission links
+
+- Hosted application: <https://campus-pulse-csce553.onrender.com>
+- GitHub repository: <https://github.com/GFP-1011/campus-pulse-csce553>
+- Evidence note: [docs/M1-evidence.md](docs/M1-evidence.md)
 
 ## Course-use notice
 
 This repository and its deployment are a CSCE 553 class baseline. They are isolated from production systems and use fake users and fake content. They may be load-tested in later course milestones.
-
