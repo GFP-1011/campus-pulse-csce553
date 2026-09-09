@@ -1,0 +1,3 @@
+-r ../requirements-dev.txt
+psutil>=6,<8
+matplotlib>=3.9,<4

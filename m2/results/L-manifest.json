@@ -1,0 +1,16 @@
+{
+  "series": "L",
+  "base": "http://127.0.0.1:8000",
+  "started_utc": "2026-09-09T06:47:51.157477+00:00",
+  "api_commit": "8f0d1bde5ac280ec1cc924bebdfdb7d5efb38ad6",
+  "python": "3.13.5 | packaged by Anaconda, Inc. | (main, Jun 12 2025, 16:09:02) [GCC 11.2.0]",
+  "driver_sha256": "6ca8f1c4316a09d089dd4151b5627065b17614a874dfcfd6c541bdb496b3faa6",
+  "prediction_sha256": "47518407d63f24bbac1a38115abf2a7e5597adee39f912634116a6a3c3f20981",
+  "warmup_s": 10,
+  "measurement_s": 60,
+  "recovery_s": 30,
+  "feed_rows": 100,
+  "read_response_bytes": 23701,
+  "finished_utc": "2026-09-09T07:03:03.839097+00:00",
+  "last_healthy_read_concurrency": 32
+}

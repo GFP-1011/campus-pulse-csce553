@@ -1,0 +1,9 @@
+condition=hosted service idle for 15 minutes with no intervening requests
+started_utc=2026-09-09T06:30:40Z
+method=GET
+url=https://campus-pulse-csce553.onrender.com/health
+http_code=200
+time_total_s=32.624475
+size_download_bytes=15
+ended_utc=2026-09-09T06:31:12Z
+response_body={"status":"ok"}

@@ -1,0 +1,36 @@
+{"utc": "2026-09-09T03:52:40.965270+00:00", "series": "H", "event": "stage_started", "label": "H-health-c2"}
+{"utc": "2026-09-09T03:53:51.222502+00:00", "series": "H", "event": "stage_finished", "label": "H-health-c2", "stop": false}
+{"utc": "2026-09-09T03:54:21.222784+00:00", "series": "H", "event": "stage_started", "label": "H-read-c1"}
+{"utc": "2026-09-09T03:55:31.567383+00:00", "series": "H", "event": "stage_finished", "label": "H-read-c1", "stop": false}
+{"utc": "2026-09-09T03:56:01.567663+00:00", "series": "H", "event": "stage_started", "label": "H-read-c4"}
+{"utc": "2026-09-09T03:57:12.368495+00:00", "series": "H", "event": "stage_finished", "label": "H-read-c4", "stop": false}
+{"utc": "2026-09-09T03:57:42.368771+00:00", "series": "H", "event": "stage_started", "label": "H-read-c8"}
+{"utc": "2026-09-09T03:58:54.362068+00:00", "series": "H", "event": "stage_finished", "label": "H-read-c8", "stop": false}
+{"utc": "2026-09-09T03:59:24.362323+00:00", "series": "H", "event": "stage_started", "label": "H-read-c16"}
+{"utc": "2026-09-09T04:00:38.566000+00:00", "series": "H", "event": "stage_finished", "label": "H-read-c16", "stop": false}
+{"utc": "2026-09-09T04:01:08.566306+00:00", "series": "H", "event": "stage_started", "label": "H-read-c32"}
+{"utc": "2026-09-09T04:02:27.287608+00:00", "series": "H", "event": "stage_finished", "label": "H-read-c32", "stop": true}
+{"utc": "2026-09-09T04:02:57.287799+00:00", "series": "H", "event": "stage_started", "label": "H-read-c16-repeat"}
+{"utc": "2026-09-09T04:04:11.592371+00:00", "series": "H", "event": "stage_finished", "label": "H-read-c16-repeat", "stop": false}
+{"utc": "2026-09-09T04:04:41.592615+00:00", "series": "H", "event": "stage_started", "label": "H-write-c16"}
+{"utc": "2026-09-09T04:05:53.159420+00:00", "series": "H", "event": "stage_finished", "label": "H-write-c16", "stop": false}
+{"utc": "2026-09-09T04:06:23.159707+00:00", "series": "H", "event": "stage_started", "label": "H-mix-c16"}
+{"utc": "2026-09-09T04:07:37.061432+00:00", "series": "H", "event": "stage_finished", "label": "H-mix-c16", "stop": false}
+{"utc": "2026-09-09T06:47:51.590581+00:00", "series": "L", "event": "stage_started", "label": "L-health-c2"}
+{"utc": "2026-09-09T06:49:01.863534+00:00", "series": "L", "event": "stage_finished", "label": "L-health-c2", "stop": false}
+{"utc": "2026-09-09T06:49:31.864298+00:00", "series": "L", "event": "stage_started", "label": "L-read-c1"}
+{"utc": "2026-09-09T06:50:41.979646+00:00", "series": "L", "event": "stage_finished", "label": "L-read-c1", "stop": false}
+{"utc": "2026-09-09T06:51:11.980352+00:00", "series": "L", "event": "stage_started", "label": "L-read-c4"}
+{"utc": "2026-09-09T06:52:22.786495+00:00", "series": "L", "event": "stage_finished", "label": "L-read-c4", "stop": false}
+{"utc": "2026-09-09T06:52:52.787237+00:00", "series": "L", "event": "stage_started", "label": "L-read-c8"}
+{"utc": "2026-09-09T06:54:03.537963+00:00", "series": "L", "event": "stage_finished", "label": "L-read-c8", "stop": false}
+{"utc": "2026-09-09T06:54:33.538730+00:00", "series": "L", "event": "stage_started", "label": "L-read-c16"}
+{"utc": "2026-09-09T06:55:44.570567+00:00", "series": "L", "event": "stage_finished", "label": "L-read-c16", "stop": false}
+{"utc": "2026-09-09T06:56:14.571325+00:00", "series": "L", "event": "stage_started", "label": "L-read-c32"}
+{"utc": "2026-09-09T06:57:26.589169+00:00", "series": "L", "event": "stage_finished", "label": "L-read-c32", "stop": false}
+{"utc": "2026-09-09T06:57:56.589651+00:00", "series": "L", "event": "stage_started", "label": "L-read-c32-repeat"}
+{"utc": "2026-09-09T06:59:08.612551+00:00", "series": "L", "event": "stage_finished", "label": "L-read-c32-repeat", "stop": false}
+{"utc": "2026-09-09T06:59:38.613026+00:00", "series": "L", "event": "stage_started", "label": "L-write-c32"}
+{"utc": "2026-09-09T07:00:51.460009+00:00", "series": "L", "event": "stage_finished", "label": "L-write-c32", "stop": false}
+{"utc": "2026-09-09T07:01:21.460798+00:00", "series": "L", "event": "stage_started", "label": "L-mix-c32"}
+{"utc": "2026-09-09T07:02:33.838473+00:00", "series": "L", "event": "stage_finished", "label": "L-mix-c32", "stop": false}
