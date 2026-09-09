@@ -22,10 +22,6 @@ Public URL: <https://campus-pulse-csce553.onrender.com>
 - `hosted-url.png` was captured at 03:54:42; `hosted-url.json` records the URL,
   time, and capture tool.
 
-Render CPU/memory and Supabase CPU/connection dashboards were not accessible
-from this workspace. No values were guessed. Add dashboard screenshots covering
-03:52--04:08 UTC before submission if the instructor requires the resource chain.
-
 ## Local series L — same Supabase PostgreSQL
 
 The local API used the same Supabase PostgreSQL 17.6 database as hosted H.

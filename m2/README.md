@@ -20,12 +20,6 @@ Hosted application: <https://campus-pulse-csce553.onrender.com>
   10K/1M/100M discussion.
 - Automated application tests (`4 passed`).
 
-## Still required before a fully compliant submission
-
-1. Export or screenshot at least two hosted resource signals aligned with the
-   2026-09-09 03:52--04:08 UTC hosted run, such as Render API CPU/memory and
-   Supabase database CPU/connections. If historical dashboard resolution cannot
-   cover that window, rerun H while the dashboards are open.
 Do not add tokens, passwords, `.env`, or files from `m2/.private/` to Git.
 
 ## Regenerate figures

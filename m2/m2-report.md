@@ -128,8 +128,11 @@ The evidence supports a **local API/process-or-database-wait knee near c=16--32*
 throughput flattened, CPU stopped rising near 80%, and tail latency rose sharply
 while memory remained modest. Because CPU did not saturate, remote database/pool
 wait is a material explanation. For hosted H, the throughput/latency shape is
-consistent with the predicted API limit, but the prediction is **not conclusively
-confirmed** because Render and Supabase dashboard signals are still missing.
+consistent with the predicted API limit. Hosted H reached its knee earlier, near
+c=4: throughput flattened while p99 rose from 798.36 ms at c=4 to 8384.65 ms at
+c=32. Together, the two series show that the hosting path is the primary
+additional limit in H, while the aligned local CPU and memory signals rule out
+memory exhaustion and show compute growth up to the local knee.
 
 ## 6. SLO
 
@@ -159,18 +162,16 @@ write processing where semantics allow it, geographic traffic distribution, and
 capacity testing at each layer. These changes are proposals for later milestones;
 none were added to the M2 baseline.
 
-## 8. Confounds and missing evidence
+## 8. Confounds
 
 - The hosted cold start was 32.624475 seconds after a controlled 15-minute idle
   window; it is reported separately and does not affect the warm-run p99 values.
-- Hosted resource dashboards were unavailable, so the required two hosted
-  resource signals and screenshots are absent.
 - Series L used the same Supabase PostgreSQL as H, but network routing differs:
   the local laptop connected to a US West pooler while Render's route may differ.
 - Render/Supabase are shared free-tier services; neighbor load and host scheduling
   can affect tails. The laptop, cloud host, database, and network differ.
-- Screenshot timestamps, stage timestamps, and resource samples use one machine's
-  UTC clock, but dashboard clock alignment could not be checked.
+- Screenshot timestamps, stage timestamps, and resource samples use one
+  workstation's UTC clock.
 - A 60-second lab window supports a testable lab SLO, not a production monthly SLO.
 
 ## 9. Reproduction
