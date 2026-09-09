@@ -1,0 +1,2 @@
+GitHub repository: https://github.com/GFP-1011/campus-pulse-csce553
+Hosted app: https://campus-pulse-csce553.onrender.com
