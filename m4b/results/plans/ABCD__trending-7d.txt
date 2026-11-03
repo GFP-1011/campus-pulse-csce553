@@ -1,0 +1,47 @@
+Limit  (cost=35598.98..35599.03 rows=20 width=151) (actual time=193.598..196.129 rows=20 loops=1)
+  Buffers: shared hit=155651
+  ->  Sort  (cost=35598.98..35794.53 rows=78220 width=151) (actual time=193.596..196.125 rows=20 loops=1)
+        Sort Key: (count(l.id)) DESC, p.id DESC
+        Sort Method: top-N heapsort  Memory: 32kB
+        Buffers: shared hit=155651
+        ->  Finalize GroupAggregate  (cost=1002.72..33517.57 rows=78220 width=151) (actual time=7.850..192.501 rows=15775 loops=1)
+              Group Key: p.id, u.username
+              Buffers: shared hit=155651
+              ->  Gather Merge  (cost=1002.72..32390.28 rows=46012 width=151) (actual time=7.835..185.525 rows=15775 loops=1)
+                    Workers Planned: 1
+                    Workers Launched: 1
+                    Buffers: shared hit=155651
+                    ->  Partial GroupAggregate  (cost=2.71..26213.92 rows=46012 width=151) (actual time=0.377..114.520 rows=7888 loops=2)
+                          Group Key: p.id, u.username
+                          Buffers: shared hit=155651
+                          ->  Incremental Sort  (cost=2.71..25408.71 rows=46012 width=151) (actual time=0.367..103.644 rows=42634 loops=2)
+                                Sort Key: p.id DESC, u.username
+                                Presorted Key: p.id
+                                Full-sort Groups: 750  Sort Method: quicksort  Average Memory: 32kB  Peak Memory: 32kB
+                                Pre-sorted Groups: 10  Sort Method: quicksort  Average Memory: 25kB  Peak Memory: 25kB
+                                Buffers: shared hit=155651
+                                Worker 0:  Full-sort Groups: 1378  Sort Method: quicksort  Average Memory: 32kB  Peak Memory: 32kB
+                                ->  Nested Loop Left Join  (cost=1.14..24162.62 rows=46012 width=151) (actual time=0.143..90.033 rows=42634 loops=2)
+                                      Buffers: shared hit=155606
+                                      ->  Nested Loop  (cost=0.72..10416.40 rows=9202 width=143) (actual time=0.124..44.551 rows=7888 loops=2)
+                                            Buffers: shared hit=33312
+                                            ->  Parallel Index Scan Backward using posts_pkey on posts p  (cost=0.42..7565.21 rows=9202 width=141) (actual time=0.025..22.573 rows=7888 loops=2)
+                                                  Filter: (created_at >= '2026-09-19 04:39:13.514414+00'::timestamp with time zone)
+                                                  Rows Removed by Filter: 92112
+                                                  Buffers: shared hit=5600
+                                            ->  Memoize  (cost=0.30..0.33 rows=1 width=18) (actual time=0.002..0.002 rows=1 loops=15775)
+                                                  Cache Key: p.author_id
+                                                  Cache Mode: logical
+                                                  Hits: 1740  Misses: 3787  Evictions: 0  Overflows: 0  Memory Usage: 474kB
+                                                  Buffers: shared hit=27712
+                                                  Worker 0:  Hits: 4798  Misses: 5450  Evictions: 0  Overflows: 0  Memory Usage: 682kB
+                                                  ->  Index Scan using users_pkey on users u  (cost=0.29..0.32 rows=1 width=18) (actual time=0.003..0.003 rows=1 loops=9237)
+                                                        Index Cond: (id = p.author_id)
+                                                        Buffers: shared hit=27712
+                                      ->  Index Scan using likes_post_id on likes l  (cost=0.42..1.32 rows=17 width=16) (actual time=0.002..0.005 rows=5 loops=15775)
+                                            Index Cond: (post_id = p.id)
+                                            Buffers: shared hit=122294
+Planning:
+  Buffers: shared hit=49
+Planning Time: 0.544 ms
+Execution Time: 196.212 ms

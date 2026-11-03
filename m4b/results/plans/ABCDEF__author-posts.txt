@@ -1,0 +1,14 @@
+Limit  (cost=0.71..25.50 rows=19 width=151) (actual time=0.030..0.037 rows=3 loops=1)
+  Buffers: shared hit=9
+  ->  Nested Loop  (cost=0.71..25.50 rows=19 width=151) (actual time=0.029..0.035 rows=3 loops=1)
+        Buffers: shared hit=9
+        ->  Index Scan using posts_author_id_id on posts p  (cost=0.42..22.75 rows=19 width=149) (actual time=0.015..0.019 rows=3 loops=1)
+              Index Cond: (author_id = '18650'::smallint)
+              Buffers: shared hit=6
+        ->  Materialize  (cost=0.29..2.51 rows=1 width=18) (actual time=0.004..0.004 rows=1 loops=3)
+              Buffers: shared hit=3
+              ->  Index Scan using users_pkey on users u  (cost=0.29..2.51 rows=1 width=18) (actual time=0.009..0.010 rows=1 loops=1)
+                    Index Cond: (id = '18650'::smallint)
+                    Buffers: shared hit=3
+Planning Time: 0.135 ms
+Execution Time: 0.065 ms

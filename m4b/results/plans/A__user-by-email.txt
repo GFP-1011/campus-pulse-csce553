@@ -1,0 +1,6 @@
+Seq Scan on users  (cost=0.00..458.00 rows=1 width=42) (actual time=0.685..2.075 rows=1 loops=1)
+  Filter: (email = 'user06316@louisiana.edu'::text)
+  Rows Removed by Filter: 19999
+  Buffers: shared hit=208
+Planning Time: 0.072 ms
+Execution Time: 2.102 ms

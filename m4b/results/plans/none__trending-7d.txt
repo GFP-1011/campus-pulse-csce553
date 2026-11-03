@@ -1,0 +1,45 @@
+Limit  (cost=38044.59..38044.64 rows=20 width=151) (actual time=362.619..453.449 rows=20 loops=1)
+  Buffers: shared hit=12338, temp read=1722 written=1728
+  ->  Sort  (cost=38044.59..38246.57 rows=80790 width=151) (actual time=362.618..453.445 rows=20 loops=1)
+        Sort Key: (count(l.id)) DESC, p.id DESC
+        Sort Method: top-N heapsort  Memory: 32kB
+        Buffers: shared hit=12338, temp read=1722 written=1728
+        ->  Finalize GroupAggregate  (cost=28433.54..35894.80 rows=80790 width=151) (actual time=275.986..449.639 rows=15775 loops=1)
+              Group Key: p.id, u.username
+              Buffers: shared hit=12338, temp read=1722 written=1728
+              ->  Gather Merge  (cost=28433.54..34730.47 rows=47524 width=151) (actual time=275.973..441.761 rows=22133 loops=1)
+                    Workers Planned: 1
+                    Workers Launched: 1
+                    Buffers: shared hit=12338, temp read=1722 written=1728
+                    ->  Partial GroupAggregate  (cost=27433.53..28384.01 rows=47524 width=151) (actual time=213.966..261.599 rows=11066 loops=2)
+                          Group Key: p.id, u.username
+                          Buffers: shared hit=12338, temp read=1722 written=1728
+                          ->  Sort  (cost=27433.53..27552.34 rows=47524 width=151) (actual time=213.950..250.071 rows=42634 loops=2)
+                                Sort Key: p.id DESC, u.username
+                                Sort Method: external merge  Disk: 6936kB
+                                Buffers: shared hit=12338, temp read=1722 written=1728
+                                Worker 0:  Sort Method: external merge  Disk: 6840kB
+                                ->  Hash Join  (cost=6735.40..21646.68 rows=47524 width=151) (actual time=71.141..165.221 rows=42634 loops=2)
+                                      Hash Cond: (p.author_id = u.id)
+                                      Buffers: shared hit=12273
+                                      ->  Parallel Hash Right Join  (cost=6077.40..20863.90 rows=47524 width=149) (actual time=64.416..145.287 rows=42634 loops=2)
+                                            Hash Cond: (l.post_id = p.id)
+                                            Buffers: shared hit=11848
+                                            ->  Parallel Seq Scan on likes l  (cost=0.00..13242.35 rows=588235 width=16) (actual time=0.010..40.312 rows=500000 loops=2)
+                                                  Buffers: shared hit=7360
+                                            ->  Parallel Hash  (cost=5958.59..5958.59 rows=9505 width=141) (actual time=13.165..13.165 rows=7888 loops=2)
+                                                  Buckets: 16384  Batches: 1  Memory Usage: 2880kB
+                                                  Buffers: shared hit=4488
+                                                  ->  Parallel Seq Scan on posts p  (cost=0.00..5958.59 rows=9505 width=141) (actual time=18.024..20.857 rows=15775 loops=1)
+                                                        Filter: (created_at >= '2026-09-19 04:39:13.514414+00'::timestamp with time zone)
+                                                        Rows Removed by Filter: 184225
+                                                        Buffers: shared hit=4488
+                                      ->  Hash  (cost=408.00..408.00 rows=20000 width=18) (actual time=6.649..6.650 rows=20000 loops=2)
+                                            Buckets: 32768  Batches: 1  Memory Usage: 1350kB
+                                            Buffers: shared hit=416
+                                            ->  Seq Scan on users u  (cost=0.00..408.00 rows=20000 width=18) (actual time=0.027..2.506 rows=20000 loops=2)
+                                                  Buffers: shared hit=416
+Planning:
+  Buffers: shared hit=25
+Planning Time: 0.434 ms
+Execution Time: 454.068 ms

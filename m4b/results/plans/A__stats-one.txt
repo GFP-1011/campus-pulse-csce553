@@ -1,0 +1,21 @@
+HashAggregate  (cost=8.33..8.50 rows=17 width=159) (actual time=0.073..0.075 rows=1 loops=1)
+  Group Key: u.id
+  Batches: 1  Memory Usage: 24kB
+  Buffers: shared hit=10
+  ->  Nested Loop Left Join  (cost=1.13..8.24 rows=17 width=159) (actual time=0.066..0.067 rows=1 loops=1)
+        Buffers: shared hit=10
+        ->  Nested Loop  (cost=0.71..5.14 rows=1 width=151) (actual time=0.057..0.058 rows=1 loops=1)
+              Buffers: shared hit=7
+              ->  Index Scan using posts_pkey on posts p  (cost=0.42..2.64 rows=1 width=141) (actual time=0.045..0.046 rows=1 loops=1)
+                    Index Cond: (id = 102204)
+                    Buffers: shared hit=4
+              ->  Index Scan using users_pkey on users u  (cost=0.29..2.51 rows=1 width=18) (actual time=0.007..0.007 rows=1 loops=1)
+                    Index Cond: (id = p.author_id)
+                    Buffers: shared hit=3
+        ->  Index Scan using likes_post_id on likes l  (cost=0.42..2.93 rows=17 width=16) (actual time=0.009..0.009 rows=0 loops=1)
+              Index Cond: (post_id = 102204)
+              Buffers: shared hit=3
+Planning:
+  Buffers: shared hit=6
+Planning Time: 0.248 ms
+Execution Time: 0.123 ms

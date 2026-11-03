@@ -1,0 +1,5 @@
+Index Scan using users_email on users  (cost=0.29..2.51 rows=1 width=42) (actual time=0.021..0.022 rows=1 loops=1)
+  Index Cond: (email = 'user06316@louisiana.edu'::text)
+  Buffers: shared hit=3
+Planning Time: 0.071 ms
+Execution Time: 0.046 ms

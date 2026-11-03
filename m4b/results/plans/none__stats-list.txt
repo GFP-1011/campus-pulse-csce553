@@ -1,0 +1,36 @@
+GroupAggregate  (cost=21187.48..21194.97 rows=333 width=151) (actual time=188.016..188.052 rows=20 loops=1)
+  Group Key: p.id, p.body, u.username
+  Buffers: shared hit=7424
+  ->  Sort  (cost=21187.48..21188.31 rows=333 width=151) (actual time=188.002..188.012 rows=109 loops=1)
+        Sort Key: p.id DESC, p.body, u.username
+        Sort Method: quicksort  Memory: 43kB
+        Buffers: shared hit=7424
+        ->  Nested Loop  (cost=2.03..21173.53 rows=333 width=151) (actual time=101.391..187.934 rows=109 loops=1)
+              Buffers: shared hit=7424
+              ->  Hash Right Join  (cost=1.73..21115.06 rows=333 width=149) (actual time=101.361..187.737 rows=109 loops=1)
+                    Hash Cond: (l.post_id = p.id)
+                    Buffers: shared hit=7364
+                    ->  Seq Scan on likes l  (cost=0.00..17360.00 rows=1000000 width=16) (actual time=0.012..74.546 rows=1000000 loops=1)
+                          Buffers: shared hit=7360
+                    ->  Hash  (cost=1.48..1.48 rows=20 width=141) (actual time=0.043..0.044 rows=20 loops=1)
+                          Buckets: 1024  Batches: 1  Memory Usage: 12kB
+                          Buffers: shared hit=4
+                          ->  Subquery Scan on p  (cost=0.42..1.48 rows=20 width=141) (actual time=0.022..0.034 rows=20 loops=1)
+                                Buffers: shared hit=4
+                                ->  Limit  (cost=0.42..1.28 rows=20 width=149) (actual time=0.021..0.030 rows=20 loops=1)
+                                      Buffers: shared hit=4
+                                      ->  Index Scan Backward using posts_pkey on posts  (cost=0.42..6574.36 rows=152951 width=149) (actual time=0.021..0.027 rows=20 loops=1)
+                                            Index Cond: (id < 153524)
+                                            Buffers: shared hit=4
+              ->  Memoize  (cost=0.30..2.40 rows=1 width=18) (actual time=0.001..0.001 rows=1 loops=109)
+                    Cache Key: p.author_id
+                    Cache Mode: logical
+                    Hits: 89  Misses: 20  Evictions: 0  Overflows: 0  Memory Usage: 3kB
+                    Buffers: shared hit=60
+                    ->  Index Scan using users_pkey on users u  (cost=0.29..2.40 rows=1 width=18) (actual time=0.005..0.005 rows=1 loops=20)
+                          Index Cond: (id = p.author_id)
+                          Buffers: shared hit=60
+Planning:
+  Buffers: shared hit=6
+Planning Time: 0.301 ms
+Execution Time: 188.119 ms

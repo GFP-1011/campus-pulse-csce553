@@ -1,0 +1,5 @@
+Index Scan using users_pkey on users  (cost=0.29..2.51 rows=1 width=42) (actual time=0.015..0.016 rows=1 loops=1)
+  Index Cond: (id = '18650'::smallint)
+  Buffers: shared hit=3
+Planning Time: 0.073 ms
+Execution Time: 0.041 ms

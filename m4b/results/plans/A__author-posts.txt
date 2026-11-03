@@ -1,0 +1,22 @@
+Limit  (cost=6986.45..6987.72 rows=11 width=151) (actual time=40.645..50.806 rows=3 loops=1)
+  Buffers: shared hit=4504
+  ->  Gather Merge  (cost=6986.45..6987.72 rows=11 width=151) (actual time=40.643..50.803 rows=3 loops=1)
+        Workers Planned: 1
+        Workers Launched: 1
+        Buffers: shared hit=4504
+        ->  Sort  (cost=5986.44..5986.47 rows=11 width=151) (actual time=9.555..9.557 rows=2 loops=2)
+              Sort Key: p.id DESC
+              Sort Method: quicksort  Memory: 25kB
+              Buffers: shared hit=4504
+              Worker 0:  Sort Method: quicksort  Memory: 25kB
+              ->  Nested Loop  (cost=0.29..5986.25 rows=11 width=151) (actual time=0.649..9.244 rows=2 loops=2)
+                    Buffers: shared hit=4497
+                    ->  Parallel Seq Scan on posts p  (cost=0.00..5958.59 rows=11 width=149) (actual time=0.342..8.913 rows=2 loops=2)
+                          Filter: (author_id = '18650'::smallint)
+                          Rows Removed by Filter: 99998
+                          Buffers: shared hit=4488
+                    ->  Index Scan using users_pkey on users u  (cost=0.29..2.51 rows=1 width=18) (actual time=0.212..0.214 rows=1 loops=3)
+                          Index Cond: (id = '18650'::smallint)
+                          Buffers: shared hit=9
+Planning Time: 0.136 ms
+Execution Time: 50.856 ms

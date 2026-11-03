@@ -1,0 +1,29 @@
+GroupAggregate  (cost=15720.30..15720.60 rows=17 width=159) (actual time=227.588..231.641 rows=1 loops=1)
+  Group Key: u.id
+  Buffers: shared hit=3079 read=4288
+  ->  Sort  (cost=15720.30..15720.34 rows=17 width=159) (actual time=227.582..231.634 rows=1 loops=1)
+        Sort Key: u.id
+        Sort Method: quicksort  Memory: 25kB
+        Buffers: shared hit=3079 read=4288
+        ->  Nested Loop Left Join  (cost=1000.71..15719.95 rows=17 width=159) (actual time=227.568..231.625 rows=1 loops=1)
+              Buffers: shared hit=3079 read=4288
+              ->  Nested Loop  (cost=0.71..5.14 rows=1 width=151) (actual time=0.021..0.026 rows=1 loops=1)
+                    Buffers: shared hit=7
+                    ->  Index Scan using posts_pkey on posts p  (cost=0.42..2.64 rows=1 width=141) (actual time=0.012..0.016 rows=1 loops=1)
+                          Index Cond: (id = 102204)
+                          Buffers: shared hit=4
+                    ->  Index Scan using users_pkey on users u  (cost=0.29..2.51 rows=1 width=18) (actual time=0.006..0.006 rows=1 loops=1)
+                          Index Cond: (id = p.author_id)
+                          Buffers: shared hit=3
+              ->  Gather  (cost=1000.00..15714.64 rows=17 width=16) (actual time=227.544..231.594 rows=0 loops=1)
+                    Workers Planned: 1
+                    Workers Launched: 1
+                    Buffers: shared hit=3072 read=4288
+                    ->  Parallel Seq Scan on likes l  (cost=0.00..14712.94 rows=10 width=16) (actual time=224.477..224.477 rows=0 loops=2)
+                          Filter: (post_id = 102204)
+                          Rows Removed by Filter: 500000
+                          Buffers: shared hit=3072 read=4288
+Planning:
+  Buffers: shared hit=6
+Planning Time: 0.238 ms
+Execution Time: 231.707 ms

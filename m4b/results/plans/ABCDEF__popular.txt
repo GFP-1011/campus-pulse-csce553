@@ -1,0 +1,16 @@
+-- estimated plan (query took 10660 ms; actual timings in the .json file when available)
+Limit  (cost=204570.63..204570.68 rows=20 width=151)
+  ->  Sort  (cost=204570.63..207070.63 rows=1000000 width=151)
+        Sort Key: (count(l.id)) DESC, p.id DESC
+        ->  HashAggregate  (cost=124992.24..177960.99 rows=1000000 width=151)
+              Group Key: p.id, u.username
+              Planned Partitions: 128
+              ->  Hash Join  (cost=13748.00..50226.61 rows=1000000 width=151)
+                    Hash Cond: (p.author_id = u.id)
+                    ->  Hash Right Join  (cost=13090.00..46943.06 rows=1000000 width=149)
+                          Hash Cond: (l.post_id = p.id)
+                          ->  Seq Scan on likes l  (cost=0.00..17360.00 rows=1000000 width=16)
+                          ->  Hash  (cost=6488.00..6488.00 rows=200000 width=141)
+                                ->  Seq Scan on posts p  (cost=0.00..6488.00 rows=200000 width=141)
+                    ->  Hash  (cost=408.00..408.00 rows=20000 width=18)
+                          ->  Seq Scan on users u  (cost=0.00..408.00 rows=20000 width=18)

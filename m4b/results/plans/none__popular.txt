@@ -1,0 +1,32 @@
+Limit  (cost=204570.63..204570.68 rows=20 width=151) (actual time=5777.989..5778.000 rows=20 loops=1)
+  Buffers: shared hit=12056, temp read=29509 written=60822
+  ->  Sort  (cost=204570.63..207070.63 rows=1000000 width=151) (actual time=5777.316..5777.324 rows=20 loops=1)
+        Sort Key: (count(l.id)) DESC, p.id DESC
+        Sort Method: top-N heapsort  Memory: 33kB
+        Buffers: shared hit=12056, temp read=29509 written=60822
+        ->  HashAggregate  (cost=124992.24..177960.99 rows=1000000 width=151) (actual time=3256.774..5731.207 rows=200000 loops=1)
+              Group Key: p.id, u.username
+              Planned Partitions: 128  Batches: 129  Memory Usage: 4369kB  Disk Usage: 253184kB
+              Buffers: shared hit=12056, temp read=29509 written=60822
+              ->  Hash Join  (cost=13748.00..50226.61 rows=1000000 width=151) (actual time=147.668..1920.946 rows=1073600 loops=1)
+                    Hash Cond: (p.author_id = u.id)
+                    Buffers: shared hit=12056, temp read=7903 written=7903
+                    ->  Hash Right Join  (cost=13090.00..46943.06 rows=1000000 width=149) (actual time=140.010..1617.965 rows=1073600 loops=1)
+                          Hash Cond: (l.post_id = p.id)
+                          Buffers: shared hit=11848, temp read=7903 written=7903
+                          ->  Seq Scan on likes l  (cost=0.00..17360.00 rows=1000000 width=16) (actual time=0.017..126.767 rows=1000000 loops=1)
+                                Buffers: shared hit=7360
+                          ->  Hash  (cost=6488.00..6488.00 rows=200000 width=141) (actual time=139.783..139.784 rows=200000 loops=1)
+                                Buckets: 32768  Batches: 16  Memory Usage: 2447kB
+                                Buffers: shared hit=4488, temp written=3763
+                                ->  Seq Scan on posts p  (cost=0.00..6488.00 rows=200000 width=141) (actual time=0.036..67.135 rows=200000 loops=1)
+                                      Buffers: shared hit=4488
+                    ->  Hash  (cost=408.00..408.00 rows=20000 width=18) (actual time=7.646..7.647 rows=20000 loops=1)
+                          Buckets: 32768  Batches: 1  Memory Usage: 1350kB
+                          Buffers: shared hit=208
+                          ->  Seq Scan on users u  (cost=0.00..408.00 rows=20000 width=18) (actual time=0.025..3.428 rows=20000 loops=1)
+                                Buffers: shared hit=208
+Planning:
+  Buffers: shared hit=25
+Planning Time: 3.339 ms
+Execution Time: 5782.415 ms

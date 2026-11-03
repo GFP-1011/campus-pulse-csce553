@@ -1,0 +1,39 @@
+Limit  (cost=10786.07..10853.92 rows=20 width=159) (actual time=34.673..39.903 rows=20 loops=1)
+  Buffers: shared hit=6171
+  ->  Nested Loop  (cost=10786.07..11135.51 rows=103 width=159) (actual time=34.672..39.897 rows=20 loops=1)
+        Buffers: shared hit=6171
+        ->  Gather Merge  (cost=10785.78..10797.52 rows=103 width=157) (actual time=34.600..39.650 rows=20 loops=1)
+              Workers Planned: 1
+              Workers Launched: 1
+              Buffers: shared hit=6050
+              ->  Sort  (cost=9785.77..9785.93 rows=61 width=157) (actual time=29.846..29.854 rows=40 loops=2)
+                    Sort Key: p.created_at DESC
+                    Sort Method: quicksort  Memory: 38kB
+                    Buffers: shared hit=6050
+                    Worker 0:  Sort Method: quicksort  Memory: 36kB
+                    ->  Parallel Hash Join  (cost=2942.66..9783.96 rows=61 width=157) (actual time=7.372..29.720 rows=74 loops=2)
+                          Hash Cond: (p.author_id = f.friend_id)
+                          Buffers: shared hit=5992
+                          ->  Parallel Seq Scan on posts p  (cost=0.00..5664.47 rows=117647 width=149) (actual time=0.006..10.144 rows=100000 loops=2)
+                                Buffers: shared hit=4488
+                          ->  Parallel Hash  (cost=2942.59..2942.59 rows=6 width=8) (actual time=6.967..6.967 rows=5 loops=2)
+                                Buckets: 1024  Batches: 1  Memory Usage: 40kB
+                                Buffers: shared hit=1472
+                                ->  Parallel Seq Scan on friendships f  (cost=0.00..2942.59 rows=6 width=8) (actual time=6.649..6.878 rows=5 loops=2)
+                                      Filter: (user_id = '18650'::smallint)
+                                      Rows Removed by Filter: 99995
+                                      Buffers: shared hit=1472
+        ->  Index Scan using users_pkey on users u  (cost=0.29..0.31 rows=1 width=18) (actual time=0.003..0.003 rows=1 loops=20)
+              Index Cond: (id = p.author_id)
+              Buffers: shared hit=60
+        SubPlan 1
+          ->  Aggregate  (cost=2.96..2.97 rows=1 width=8) (actual time=0.006..0.006 rows=1 loops=20)
+                Buffers: shared hit=61
+                ->  Index Only Scan using likes_post_id on likes l  (cost=0.42..2.92 rows=17 width=0) (actual time=0.004..0.005 rows=6 loops=20)
+                      Index Cond: (post_id = p.id)
+                      Heap Fetches: 0
+                      Buffers: shared hit=61
+Planning:
+  Buffers: shared hit=12
+Planning Time: 0.419 ms
+Execution Time: 39.985 ms

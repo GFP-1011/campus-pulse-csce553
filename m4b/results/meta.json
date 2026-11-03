@@ -1,0 +1,19 @@
+{
+  "started_utc": "2026-10-28T02:09:02+00:00",
+  "schema": "m4b",
+  "configs": [
+    "none",
+    "A",
+    "ABCD",
+    "ABCDEF"
+  ],
+  "concurrency": [
+    1,
+    4
+  ],
+  "duration_s": 10.0,
+  "warmup_s": 3,
+  "rtt_select1_median_ms": 93.88,
+  "rtt_select1_p95_ms": 167.44,
+  "finished_utc": "2026-10-28T02:25:07+00:00"
+}

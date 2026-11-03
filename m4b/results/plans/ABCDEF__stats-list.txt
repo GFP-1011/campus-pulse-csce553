@@ -1,0 +1,27 @@
+GroupAggregate  (cost=6.95..128.49 rows=328 width=151) (actual time=0.158..0.424 rows=20 loops=1)
+  Group Key: posts.id, posts.body, u.username
+  Buffers: shared hit=221
+  ->  Incremental Sort  (cost=6.95..121.93 rows=328 width=151) (actual time=0.148..0.386 rows=109 loops=1)
+        Sort Key: posts.id DESC, posts.body, u.username
+        Presorted Key: posts.id
+        Full-sort Groups: 4  Sort Method: quicksort  Average Memory: 30kB  Peak Memory: 30kB
+        Buffers: shared hit=221
+        ->  Nested Loop Left Join  (cost=1.13..110.81 rows=328 width=151) (actual time=0.036..0.325 rows=109 loops=1)
+              Buffers: shared hit=221
+              ->  Nested Loop  (cost=0.71..49.38 rows=20 width=143) (actual time=0.027..0.125 rows=20 loops=1)
+                    Buffers: shared hit=64
+                    ->  Limit  (cost=0.42..1.28 rows=20 width=149) (actual time=0.019..0.029 rows=20 loops=1)
+                          Buffers: shared hit=4
+                          ->  Index Scan Backward using posts_pkey on posts  (cost=0.42..6600.01 rows=153548 width=149) (actual time=0.018..0.025 rows=20 loops=1)
+                                Index Cond: (id < 153524)
+                                Buffers: shared hit=4
+                    ->  Index Scan using users_pkey on users u  (cost=0.29..2.40 rows=1 width=18) (actual time=0.004..0.004 rows=1 loops=20)
+                          Index Cond: (id = posts.author_id)
+                          Buffers: shared hit=60
+              ->  Index Scan using likes_post_id on likes l  (cost=0.42..2.91 rows=16 width=16) (actual time=0.004..0.009 rows=5 loops=20)
+                    Index Cond: (post_id = posts.id)
+                    Buffers: shared hit=157
+Planning:
+  Buffers: shared hit=22
+Planning Time: 0.355 ms
+Execution Time: 0.475 ms
