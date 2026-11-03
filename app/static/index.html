@@ -41,6 +41,17 @@
             <div class="card"><h2>Friends</h2><div id="friends"></div></div>
           </aside>
           <section>
+            <div class="card">
+              <h2>Search posts</h2>
+              <form id="post-search-form" class="inline">
+                <input name="q" maxlength="200" placeholder='Words, "a phrase", or, -exclude'>
+                <select name="sort"><option value="relevance">Relevance</option><option value="newest">Newest</option></select>
+                <button>Search</button>
+              </form>
+              <div id="search-meta"></div>
+              <div id="search-facets" class="facets"></div>
+            </div>
+            <div id="search-results"></div>
             <form id="post-form" class="card composer">
               <h2 id="welcome">Your feed</h2>
               <textarea name="body" maxlength="2000" required placeholder="Share an update..."></textarea>

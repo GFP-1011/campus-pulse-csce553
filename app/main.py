@@ -7,6 +7,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app import models  # noqa: F401 - registers SQLAlchemy models
 from app.api import router
+from app.search import router as search_router
 from app.database import Base, engine
 
 
@@ -27,6 +28,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 app.include_router(router)
+app.include_router(search_router)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 

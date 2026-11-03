@@ -27,5 +27,12 @@ button.secondary { background: #ffffff20; border: 1px solid #ffffff80; }
 .actions button { background: #edf1fc; color: #29489e; }
 .hidden { display: none !important; }
 #toast { position: fixed; right: 1rem; bottom: 1rem; max-width: 360px; background: #172033; color: white; padding: .8rem 1rem; border-radius: 7px; display: none; }
+select { padding: .6rem; border: 1px solid #bdc5d5; border-radius: 6px; font: inherit; background: white; }
+.muted { color: #647086; font-size: .9rem; margin: .7rem 0 .3rem; }
+.facets { display: flex; flex-wrap: wrap; gap: .4rem; }
+.chip { padding: .3rem .6rem; background: #edf1fc; color: #29489e; font-size: .85rem; }
+.chip.active { background: #3156c8; color: white; }
+button.link { padding: 0 .2rem; background: none; color: #3156c8; text-decoration: underline; }
+.pager { margin-bottom: 1rem; }
 @media (max-width: 720px) { .auth-grid, .layout { grid-template-columns: 1fr; } header span { display: none; } }
 
