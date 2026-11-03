@@ -1,0 +1,19 @@
+Limit  (cost=17.04..17.07 rows=9 width=203) (actual time=0.112..0.114 rows=2 loops=1)
+  Buffers: shared hit=8
+  ->  Sort  (cost=17.04..17.07 rows=9 width=203) (actual time=0.111..0.112 rows=2 loops=1)
+        Sort Key: (ts_rank(s.fts, '''librari'' & ''robot'''::tsquery)) DESC NULLS LAST, s.created_at DESC, s.id DESC
+        Sort Method: quicksort  Memory: 25kB
+        Buffers: shared hit=8
+        ->  WindowAgg  (cost=15.74..16.90 rows=9 width=203) (actual time=0.102..0.105 rows=2 loops=1)
+              Buffers: shared hit=8
+              ->  Bitmap Heap Scan on post_search s  (cost=6.77..16.74 rows=9 width=428) (actual time=0.089..0.092 rows=2 loops=1)
+                    Recheck Cond: (fts @@ '''librari'' & ''robot'''::tsquery)
+                    Heap Blocks: exact=2
+                    Buffers: shared hit=8
+                    ->  Bitmap Index Scan on post_search_fts  (cost=0.00..6.76 rows=9 width=0) (actual time=0.080..0.080 rows=2 loops=1)
+                          Index Cond: (fts @@ '''librari'' & ''robot'''::tsquery)
+                          Buffers: shared hit=6
+Planning:
+  Buffers: shared hit=1
+Planning Time: 0.196 ms
+Execution Time: 0.149 ms

@@ -1,0 +1,20 @@
+Limit  (cost=147.96..148.01 rows=20 width=203) (actual time=5.468..5.472 rows=20 loops=1)
+  Buffers: shared hit=1372
+  ->  Sort  (cost=147.96..148.27 rows=124 width=203) (actual time=5.466..5.468 rows=20 loops=1)
+        Sort Key: (ts_rank(s.fts, '''studi'' <-> ''group'''::tsquery)) DESC NULLS LAST, s.created_at DESC, s.id DESC
+        Sort Method: top-N heapsort  Memory: 40kB
+        Buffers: shared hit=1372
+        ->  WindowAgg  (cost=142.94..144.66 rows=124 width=203) (actual time=3.636..4.778 rows=1499 loops=1)
+              Buffers: shared hit=1372
+              ->  Bitmap Heap Scan on post_search s  (cost=7.37..142.49 rows=124 width=428) (actual time=0.812..2.999 rows=1499 loops=1)
+                    Recheck Cond: (fts @@ '''studi'' <-> ''group'''::tsquery)
+                    Rows Removed by Index Recheck: 49
+                    Heap Blocks: exact=1365
+                    Buffers: shared hit=1372
+                    ->  Bitmap Index Scan on post_search_fts  (cost=0.00..7.34 rows=124 width=0) (actual time=0.646..0.647 rows=1548 loops=1)
+                          Index Cond: (fts @@ '''studi'' <-> ''group'''::tsquery)
+                          Buffers: shared hit=7
+Planning:
+  Buffers: shared hit=1
+Planning Time: 0.192 ms
+Execution Time: 5.522 ms

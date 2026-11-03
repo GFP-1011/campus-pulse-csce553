@@ -1,0 +1,19 @@
+Limit  (cost=3378.09..3378.14 rows=20 width=203) (actual time=15.466..15.470 rows=20 loops=1)
+  Buffers: shared hit=2970, temp read=283 written=231
+  ->  Sort  (cost=3378.09..3388.11 rows=4010 width=203) (actual time=15.464..15.466 rows=20 loops=1)
+        Sort Key: (ts_rank(s.fts, '''librari'' & !''quiet'''::tsquery)) DESC NULLS LAST, s.created_at DESC, s.id DESC
+        Sort Method: top-N heapsort  Memory: 40kB
+        Buffers: shared hit=2970, temp read=283 written=231
+        ->  WindowAgg  (cost=3250.53..3271.38 rows=4010 width=203) (actual time=8.269..11.596 rows=3926 loops=1)
+              Buffers: shared hit=2970, temp read=283 written=231
+              ->  Bitmap Heap Scan on post_search s  (cost=27.77..3201.21 rows=4010 width=428) (actual time=1.269..5.025 rows=3926 loops=1)
+                    Recheck Cond: (fts @@ '''librari'' & !''quiet'''::tsquery)
+                    Heap Blocks: exact=2963
+                    Buffers: shared hit=2970
+                    ->  Bitmap Index Scan on post_search_fts  (cost=0.00..26.77 rows=4010 width=0) (actual time=0.906..0.906 rows=3926 loops=1)
+                          Index Cond: (fts @@ '''librari'' & !''quiet'''::tsquery)
+                          Buffers: shared hit=7
+Planning:
+  Buffers: shared hit=1
+Planning Time: 0.196 ms
+Execution Time: 15.519 ms
