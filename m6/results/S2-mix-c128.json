@@ -1,0 +1,189 @@
+{
+ "label": "S2-mix-c128",
+ "shards": 2,
+ "workload": "mix",
+ "concurrency": 128,
+ "started_utc": "2026-11-10T23:38:59.821995+00:00",
+ "duration_s": 30.151,
+ "attempts": 44730,
+ "successes": 44730,
+ "errors": 0,
+ "error_rate": 0.0,
+ "rps_success": 1483.524,
+ "mean_ms": 85.6,
+ "p50_ms": 75.68,
+ "p95_ms": 153.63,
+ "p99_ms": 159.67,
+ "max_ms": 263.26,
+ "by_kind": {
+  "feed:ok": 31350,
+  "like:ok": 8901,
+  "post:ok": 4479
+ },
+ "ok_by_user_shard": {
+  "shard_1": 25496,
+  "shard_0": 19234
+ },
+ "error_codes": {},
+ "api_cpu_mean_pct": 204.2,
+ "api_cpu_max_pct": 241.0,
+ "api_rss_max_mib": 484.2,
+ "db_active_backends_mean": {
+  "shard_0": 0.81,
+  "shard_1": 2.31
+ },
+ "db_top_waits": {
+  "shard_0": {
+   "CPU:running": 0.44,
+   "IO:WalSync": 0.31,
+   "LWLock:WALWrite": 0.06
+  },
+  "shard_1": {
+   "LWLock:WALWrite": 1.31,
+   "CPU:running": 0.5,
+   "IO:WalSync": 0.38,
+   "Client:ClientRead": 0.06,
+   "IO:WalInitWrite": 0.06
+  }
+ },
+ "db": {
+  "shard_0": {
+   "xact_commit": 22259,
+   "xact_rollback": 0,
+   "tup_inserted": 96108,
+   "tup_updated": 0,
+   "tup_deleted": 0,
+   "blks_read": 0,
+   "blks_hit": 1760917,
+   "wal_records": 360431,
+   "wal_bytes": 41270163.0,
+   "wal_buffers_full": 0,
+   "db_exec_s_per_s": 0.313,
+   "commits_per_s": 738.2,
+   "rows_inserted_per_s": 3187.5,
+   "wal_mb_per_s": 1.369,
+   "db_size_mb": 68.6,
+   "top_statements": [
+    {
+     "query": "select post_created_at, remote_followers from m6.publish_post($1, $2, $3, $4)",
+     "calls": 1966,
+     "total_exec_ms": 3737.8,
+     "mean_exec_ms": 1.901,
+     "rows": 1966,
+     "wal_bytes": 18899682.0
+    },
+    {
+     "query": "select m6.fanout($1, $2, $3, $4, $5)",
+     "calls": 2513,
+     "total_exec_ms": 3362.3,
+     "mean_exec_ms": 1.338,
+     "rows": 2513,
+     "wal_bytes": 20647476.0
+    },
+    {
+     "query": "select post_id, author_id, preview, created_at from m6.feed_items where owner_id = $1 orde",
+     "calls": 13452,
+     "total_exec_ms": 1979.4,
+     "mean_exec_ms": 0.147,
+     "rows": 672600,
+     "wal_bytes": 0.0
+    },
+    {
+     "query": "insert into m6.likes (author_id, post_id, liker_id) values ($1,$2,$3) on conflict do nothi",
+     "calls": 3781,
+     "total_exec_ms": 336.2,
+     "mean_exec_ms": 0.089,
+     "rows": 3117,
+     "wal_bytes": 1015545.0
+    },
+    {
+     "query": "select u.id, u.display_name from m6.sessions s join m6.users u on u.id = s.user_id where s",
+     "calls": 329,
+     "total_exec_ms": 7.4,
+     "mean_exec_ms": 0.023,
+     "rows": 329,
+     "wal_bytes": 0.0
+    }
+   ]
+  },
+  "shard_1": {
+   "xact_commit": 27830,
+   "xact_rollback": 0,
+   "tup_inserted": 113214,
+   "tup_updated": 18,
+   "tup_deleted": 9,
+   "blks_read": 0,
+   "blks_hit": 2146447,
+   "wal_records": 415142,
+   "wal_bytes": 48386332.0,
+   "wal_buffers_full": 0,
+   "db_exec_s_per_s": 0.368,
+   "commits_per_s": 923.0,
+   "rows_inserted_per_s": 3754.9,
+   "wal_mb_per_s": 1.605,
+   "db_size_mb": 66.7,
+   "top_statements": [
+    {
+     "query": "select post_created_at, remote_followers from m6.publish_post($1, $2, $3, $4)",
+     "calls": 2513,
+     "total_exec_ms": 5364.0,
+     "mean_exec_ms": 2.134,
+     "rows": 2513,
+     "wal_bytes": 28175515.0
+    },
+    {
+     "query": "select m6.fanout($1, $2, $3, $4, $5)",
+     "calls": 1966,
+     "total_exec_ms": 2661.4,
+     "mean_exec_ms": 1.354,
+     "rows": 1966,
+     "wal_bytes": 18121560.0
+    },
+    {
+     "query": "select post_id, author_id, preview, created_at from m6.feed_items where owner_id = $1 orde",
+     "calls": 17898,
+     "total_exec_ms": 2589.6,
+     "mean_exec_ms": 0.145,
+     "rows": 894900,
+     "wal_bytes": 0.0
+    },
+    {
+     "query": "insert into m6.likes (author_id, post_id, liker_id) values ($1,$2,$3) on conflict do nothi",
+     "calls": 5120,
+     "total_exec_ms": 469.6,
+     "mean_exec_ms": 0.092,
+     "rows": 4151,
+     "wal_bytes": 1455593.0
+    },
+    {
+     "query": "select u.id, u.display_name from m6.sessions s join m6.users u on u.id = s.user_id where s",
+     "calls": 438,
+     "total_exec_ms": 20.8,
+     "mean_exec_ms": 0.047,
+     "rows": 438,
+     "wal_bytes": 0.0
+    }
+   ]
+  }
+ },
+ "db_host": {
+  "shard_0": {
+   "cpu_busy_pct": null,
+   "cpu_iowait_pct": null,
+   "ncpu": 2,
+   "disk_write_mb_s": 0.0,
+   "disk_writes_per_s": 0.0,
+   "disk_busy_pct": 0.0,
+   "load1_end": 0.37
+  },
+  "shard_1": {
+   "cpu_busy_pct": null,
+   "cpu_iowait_pct": null,
+   "ncpu": 2,
+   "disk_write_mb_s": 0.0,
+   "disk_writes_per_s": 0.0,
+   "disk_busy_pct": 0.0,
+   "load1_end": 1.27
+  }
+ }
+}

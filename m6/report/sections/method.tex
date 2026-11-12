@@ -1,0 +1,50 @@
+\section{Load-test method}\label{sec:method}
+
+\paragraph{System under test.} The load driver and the API run on one lab server (32 cores, 188~GB RAM). The API
+is \texttt{app\_sharded} under uvicorn with 6 worker processes. Each worker holds a \texttt{psycopg} pool of up to
+32 connections per shard to the Supabase transaction pooler (port 6543), so a project sees at most 192 client
+connections, below the pooler's limit of 200; Supabase maps them onto 15 server connections per Nano project.
+Databases: Supabase free plan, Nano compute (2 vCPU), PostgreSQL 17, both in us-west-2 (Render's default Oregon region
+is the same). The median \texttt{SELECT 1} round trip from the server was 73~ms to shard\_0 and 75~ms to shard\_1. We
+sized the API so that it is not the first limit and checked this (Section~\ref{sec:apifirst}).
+
+\paragraph{Two series, one variable.} Series \textbf{S1 (before)}: \texttt{ACTIVE\_SHARDS=1}, all 64 buckets on
+shard\_0. Series \textbf{S2 (after)}: \texttt{ACTIVE\_SHARDS=2}, buckets 0--31 on shard\_0 and 32--63 on shard\_1.
+Both series use the same code and the same seed: each rebuilds schema \texttt{m6} and loads the same 400 users
+(fixed random seed 553), the same 16{,}000 follow edges (40 per user) and one session token per user, then runs
+\texttt{m6/run\_series.py}. SHA-256 hashes of the code are stored with the results.
+
+\paragraph{Driver.} \texttt{m6/load\_m6.py} keeps the M2 driver's closed-loop design and statistics: warm-up
+discarded, fixed measurement window, per-request CSV, p50/p95/p99/max and error rate. Sharding needed two changes.
+Every client is a \emph{different} user, because one shared token, as in M2, would put all writes on one owner and
+therefore on one shard. Concurrency goes up to 256.
+
+\paragraph{Stages.} The publish staircase uses $c=1,4,8,16,32,64,128,256$ clients. Each stage has 5~s of warm-up and
+30~s of measurement; then all posts and feed rows are truncated and the system recovers for 15~s, so every stage
+starts with the same table sizes. The stop rule is the same as in M2: error rate $>$10\% or p99 $>$5~s (never
+triggered). After the staircase come a repeat of $c=128$, and like-only, home-feed-read and a 70/20/10 read/like/post
+mix at $c=128$, run against 2{,}000 pre-loaded like targets and pre-filled feeds. We later added intermediate publish
+stages to locate each peak, with the same protocol (\texttt{m6/run\_extra.py}): $c=48,96$ for S1, and $c=96,160,192$
+plus a repeat of $c=256$ for S2.
+The 30~s window (M2 used 60~s) keeps one-database stages under the free plan's 500~MB limit: each post leaves
+$\approx$13~KB of rows and index entries, and the single database reaches $\approx$575 posts/s.
+
+\paragraph{Database-side evidence.} During every measured window, on every shard, the driver records:
+\begin{itemize}[nosep,leftmargin=1.2em]
+\item 1~Hz samples of \texttt{pg\_stat\_activity}: active client backends and their wait events;
+\item before/after deltas of three statistics views: commits and rows inserted (\texttt{pg\_stat\_database}),
+      WAL bytes (\texttt{pg\_stat\_wal}), and the calls and execution time of every \texttt{m6} statement
+      (\texttt{pg\_stat\_statements}).
+\end{itemize}
+Host CPU, iowait and disk writes of each database VM come from Supabase's Prometheus endpoint
+(\texttt{/customer/v1/\allowbreak privileged/\allowbreak metrics}), which refreshes about every 60~s and is logged continuously by
+\texttt{m6/metrics\_logger.py}. API CPU is the sum over the uvicorn master and its workers (psutil, sampled every 2~s).
+
+\paragraph{Functional check.} \texttt{m6/smoke\_test.py} exercises Steps~9--10 over HTTP on the two-shard layout:
+registration lands users on both shards, a duplicate email is rejected, login returns the user's shard, a cross-shard follow writes
+both rows, a post's feed copy is written on the other shard, likes go to the author's shard, only the author can edit,
+forged tokens are rejected, and a wrong-shard insert is rejected. All 16 checks pass (\texttt{results/smoke-S2.json}).
+
+\paragraph{Other controls.} M5's pg\_cron job (refresh \texttt{search.post\_search} every 5 minutes) was paused
+during each series and re-enabled afterwards. The M1/M2 tables in \texttt{public} and the hosted Render service were
+not modified.

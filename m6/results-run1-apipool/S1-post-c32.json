@@ -1,0 +1,90 @@
+{
+ "label": "S1-post-c32",
+ "shards": 1,
+ "workload": "post",
+ "concurrency": 32,
+ "started_utc": "2026-11-10T22:47:58.327510+00:00",
+ "duration_s": 30.137,
+ "attempts": 8951,
+ "successes": 8951,
+ "errors": 0,
+ "error_rate": 0.0,
+ "rps_success": 297.012,
+ "mean_ms": 107.37,
+ "p50_ms": 86.67,
+ "p95_ms": 186.93,
+ "p99_ms": 241.41,
+ "max_ms": 845.29,
+ "by_kind": {
+  "post:ok": 8951
+ },
+ "ok_by_user_shard": {
+  "shard_0": 8951
+ },
+ "error_codes": {},
+ "api_cpu_mean_pct": 46.1,
+ "api_cpu_max_pct": 58.5,
+ "api_rss_max_mib": 569.8,
+ "db_active_backends_mean": {
+  "shard_0": 3.72
+ },
+ "db_top_waits": {
+  "shard_0": {
+   "CPU:running": 2.4,
+   "LWLock:WALWrite": 0.52,
+   "IO:WalSync": 0.4,
+   "LWLock:BufferContent": 0.28,
+   "Lock:extend": 0.04,
+   "LWLock:MultiXactOffsetSLRU": 0.04,
+   "Client:ClientRead": 0.04
+  }
+ },
+ "db": {
+  "shard_0": {
+   "xact_commit": 9383,
+   "xact_rollback": 0,
+   "tup_inserted": 417499,
+   "tup_updated": 0,
+   "tup_deleted": 0,
+   "blks_read": 0,
+   "blks_hit": 6757715,
+   "wal_records": 1350110,
+   "wal_bytes": 173246242.0,
+   "wal_buffers_full": 0,
+   "db_exec_s_per_s": 1.656,
+   "commits_per_s": 311.3,
+   "rows_inserted_per_s": 13853.5,
+   "wal_mb_per_s": 5.749,
+   "db_size_mb": 162.5,
+   "top_statements": [
+    {
+     "query": "select post_created_at, remote_followers from m6.publish_post($1, $2, $3, $4)",
+     "calls": 8951,
+     "total_exec_ms": 49830.5,
+     "mean_exec_ms": 5.567,
+     "rows": 8951,
+     "wal_bytes": 170480768.0
+    },
+    {
+     "query": "select u.id, u.display_name from m6.sessions s join m6.users u on u.id = s.user_id where s",
+     "calls": 205,
+     "total_exec_ms": 62.7,
+     "mean_exec_ms": 0.306,
+     "rows": 205,
+     "wal_bytes": 0.0
+    }
+   ]
+  }
+ },
+ "db_host": {
+  "shard_0": {
+   "cpu_busy_pct": 22.8,
+   "cpu_iowait_pct": 18.1,
+   "ncpu": 2,
+   "disk_write_mb_s": 21.28,
+   "disk_writes_per_s": 920.1,
+   "disk_busy_pct": 90.2,
+   "load1_end": 1.17
+  }
+ }
+}

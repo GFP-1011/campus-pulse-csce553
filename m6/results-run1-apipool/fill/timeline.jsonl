@@ -1,0 +1,4 @@
+{"utc": "2026-11-10T22:53:29.950263+00:00", "event": "stage_start", "label": "S1-fill", "workload": "post", "concurrency": 32}
+{"utc": "2026-11-10T22:53:42.437539+00:00", "event": "stage_end", "label": "S1-fill", "rps": 244.477, "p99": 1330.92, "err": 0.0}
+{"utc": "2026-11-10T22:56:14.260235+00:00", "event": "stage_start", "label": "S1-fill", "workload": "post", "concurrency": 32}
+{"utc": "2026-11-10T22:56:26.987675+00:00", "event": "stage_end", "label": "S1-fill", "rps": 215.506, "p99": 1234.26, "err": 0.0}

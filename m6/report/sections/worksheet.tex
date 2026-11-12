@@ -1,0 +1,115 @@
+\section{Sharding Worksheet: Choose Your Shard Key}\label{sec:worksheet}
+
+Team: \teamnames \quad App: $\square$ E-commerce \ $\boxtimes$ Social media \ $\square$ Event management \quad Date: 10 November 2026
+
+The busy-hour rates below use the M2 workload model scaled to the 1M-registered-user tier
+(10\% active in the peak hour $\Rightarrow$ 100{,}000 active users, 30 actions each, 80\% reads/20\% writes
+$\Rightarrow$ about 600{,}000 write actions per hour). The split between write actions is our planning estimate.
+The follow graph used in the experiments gives every user 40 followers, so one post produces
+41 home-feed copies.
+
+\subsection*{Step 1 · List your busiest writes}
+
+\begin{center}\small
+\begin{tabularx}{\linewidth}{@{}c>{\raggedright}p{2.4cm}>{\raggedright}X>{\raggedleft\arraybackslash}p{2.3cm}@{}}
+\toprule
+\# & User action & SQL it runs (INSERT / UPDATE / DELETE, which tables) & Busy hour \\
+\midrule
+1 & Publish a post & \texttt{INSERT posts} (+ GIN search index), \texttt{INSERT post\_tags} (one per hashtag),
+\texttt{INSERT feed\_items} for the author and each of 40 followers (41 rows) & 60{,}000 posts\newline ($\approx$2.8M rows) \\
+2 & Like a post & \texttt{INSERT likes} (one row per like; no counter \texttt{UPDATE}) & 360{,}000 \\
+3 & Log in & \texttt{INSERT sessions} (token hash, expiry) & 100{,}000 \\
+4 & Follow a user & \texttt{INSERT following} (follower side) + \texttt{INSERT followers} (followee side) & 30{,}000 actions\newline (60{,}000 rows) \\
+5 & Edit own post & \texttt{UPDATE posts} (body, \texttt{updated\_at}; re-indexes the tsvector) & 12{,}000 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\noindent\emph{Hint applied (where writes come from):} publishing is one click but 46 rows:
+by rows written it is the busiest action even though likes are more frequent.
+Registration (\texttt{INSERT user\_directory} + \texttt{INSERT users}) is rarer ($\approx$2{,}000/h) and is the sixth write.
+
+\subsection*{Step 2 · Find the owner of each write, and pick the shard key}
+
+\begin{center}\small
+\begin{tabularx}{\linewidth}{@{}c>{\raggedright}X>{\raggedright}p{3.2cm}>{\raggedright\arraybackslash}p{3.3cm}@{}}
+\toprule
+\# & Rows that must change together & Owner & Owner's id column \\
+\midrule
+1 & the post, its \texttt{post\_tags}, the author's own feed copy & the author (user) & \texttt{posts.author\_id}, \texttt{post\_tags.author\_id} \\
+  & each follower's feed copy (written second, retried) & that follower & \texttt{feed\_items.owner\_id} \\
+2 & the like row with its post (counted with the post) & the post's author & \texttt{likes.author\_id} (new column) \\
+3 & the session row & the user logging in & \texttt{sessions.user\_id} \\
+4 & \texttt{following} row; \texttt{followers} row (two owners, two writes) & follower; followee & \texttt{following.follower\_id}; \texttt{followers.followee\_id} \\
+5 & the post row & the author & \texttt{posts.author\_id} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\noindent\textbf{Our shard key: the owning user's id} (\texttt{users.id}, a UUID; for content rows the
+\emph{author's} id), hashed into 64 fixed buckets with \texttt{shard\_bucket()}.
+
+\noindent Test the key:\quad
+\ding{51} Every busy write already knows this value (the user is in the session; a like carries the post's
+\texttt{author\_id}, which the app displayed with the post). \quad
+\ding{51} The value never changes (a random UUID, not a name, email or category). \quad
+\ding{51} It has many values that are not time ranges (400 test users, 1M planned; hashed, not sign-up order).
+
+\noindent\emph{Hint applied (keep together what is written together):} every child table carries the owner's id:
+\texttt{post\_tags.author\_id}, \texttt{likes.author\_id}, \texttt{feed\_items.owner\_id}, \texttt{sessions.user\_id}.
+
+\subsection*{Step 3 · Check for a hot owner}
+\begin{itemize}[nosep,leftmargin=1.2em]
+\item Busiest single owner: a campus celebrity account (athletics or a student-government account) with
+      most of campus following it, during a game-day post.
+\item What it writes: one post fans out to every follower's feed (up to $10^5$ copies); then thousands of
+      likes per minute on that one post, all on the author's shard.
+\item Row locked by every one of those writes: none, by design: likes are rows, not
+      \texttt{UPDATE posts SET like\_count = like\_count + 1}; the fan-out inserts distinct feed rows.
+\item Our plan: $\boxtimes$~insert rows instead of updating one counter;
+      $\boxtimes$~accept the fan-out cost at class scale and say why: our test graph has a uniform 40
+      followers per user; for a real celebrity we would switch that author to \emph{collect at read time}
+      (lecture slide 50) instead of copying to $10^5$ feeds.
+\end{itemize}
+
+\subsection*{Step 4 · Find the pages that read across owners}
+\begin{center}\small
+\begin{tabularx}{\linewidth}{@{}>{\raggedright}p{3.2cm}>{\raggedright}X>{\raggedright\arraybackslash}p{4.6cm}@{}}
+\toprule
+Page & Rows it needs live on\dots & Fix \\
+\midrule
+Home feed & posts of everyone I follow (every shard) & $\boxtimes$~copy a small row (\texttt{feed\_items}: id, author, 80-char preview) to the reader's shard, written second, retried \\
+``Who I follow'' / ``my followers'' & my follow edges & $\boxtimes$~copy: \texttt{following} on my shard, \texttt{followers} on theirs \\
+Post search (M5) & posts on every shard & $\boxtimes$~ask every shard and combine (or a separate search index) \\
+\bottomrule
+\end{tabularx}
+\end{center}
+Shared, read-mostly tables copied to every shard: none needed (Campus Pulse has no product catalogue;
+the bucket function is the only thing identical everywhere).\\
+Values unique across the whole app: \textbf{email} $\rightarrow$ \texttt{m6.user\_directory} on shard\_0.
+
+\subsection*{Step 5 · Write the placement plan}
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+Table & Lives on & Routed by & New column needed? \\
+\midrule
+\texttt{users} & owner's shard & \texttt{id} & id becomes \texttt{uuid}; shard check \\
+\texttt{sessions} & owner's shard & \texttt{user\_id} & token carries the shard name \\
+\texttt{posts} & author's shard & \texttt{author\_id} & \texttt{uuid} id; \texttt{unique(author\_id,id)} \\
+\texttt{post\_tags} & author's shard & \texttt{author\_id} & yes: \texttt{author\_id} \\
+\texttt{likes} & post author's shard & \texttt{author\_id} & yes: \texttt{author\_id} \\
+\texttt{following} & follower's shard & \texttt{follower\_id} & replaces \texttt{friendships} \\
+\texttt{followers} & followee's shard & \texttt{followee\_id} & new table (other side) \\
+\texttt{feed\_items} & reader's shard & \texttt{owner\_id} & new table (copy) \\
+\texttt{user\_directory} & directory (shard\_0) & \texttt{email} & new table \\
+\texttt{bucket\_map} & directory (shard\_0) & \texttt{bucket} & new table (64 rows) \\
+\bottomrule
+\end{tabular}
+\end{center}
+Buckets: 64 (never changes). Shards: 2 $\rightarrow$ shard\_0 owns buckets 0--31, shard\_1 owns 32--63.
+
+\noindent Before Part 2:\quad \ding{51} every id column is a \texttt{uuid};
+\ding{51} every owned table has the owner's id;
+\ding{51} the shard check is on \texttt{users};
+\ding{51} the busiest transaction (publish) touches one shard for the real record (the follower copies are
+written second); \quad $\square$ instructor/TA sign-off: \rule{3cm}{0.4pt}

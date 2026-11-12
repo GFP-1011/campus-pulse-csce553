@@ -1,0 +1,96 @@
+{
+ "label": "S1-post-c64",
+ "shards": 1,
+ "workload": "post",
+ "concurrency": 64,
+ "started_utc": "2026-11-10T23:21:44.015834+00:00",
+ "duration_s": 30.123,
+ "attempts": 17277,
+ "successes": 17277,
+ "errors": 0,
+ "error_rate": 0.0,
+ "rps_success": 573.543,
+ "mean_ms": 111.29,
+ "p50_ms": 96.49,
+ "p95_ms": 169.65,
+ "p99_ms": 276.0,
+ "max_ms": 1385.99,
+ "by_kind": {
+  "post:ok": 17277
+ },
+ "ok_by_user_shard": {
+  "shard_0": 17277
+ },
+ "error_codes": {},
+ "api_cpu_mean_pct": 54.9,
+ "api_cpu_max_pct": 70.5,
+ "api_rss_max_mib": 445.2,
+ "db_active_backends_mean": {
+  "shard_0": 14.06
+ },
+ "db_top_waits": {
+  "shard_0": {
+   "CPU:running": 6.71,
+   "LWLock:WALWrite": 3.42,
+   "LWLock:BufferContent": 1.42,
+   "IO:WalSync": 0.65,
+   "Client:ClientRead": 0.61,
+   "Lock:extend": 0.55,
+   "Timeout:SpinDelay": 0.26,
+   "LWLock:MultiXactGen": 0.16,
+   "LWLock:BufferMapping": 0.13,
+   "IO:WalWrite": 0.06,
+   "IO:SlruWrite": 0.03,
+   "LWLock:WALInsert": 0.03,
+   "IO:DataFileExtend": 0.03
+  }
+ },
+ "db": {
+  "shard_0": {
+   "xact_commit": 17692,
+   "xact_rollback": 0,
+   "tup_inserted": 772444,
+   "tup_updated": 0,
+   "tup_deleted": 0,
+   "blks_read": 6,
+   "blks_hit": 11450121,
+   "wal_records": 2597847,
+   "wal_bytes": 326460723.0,
+   "wal_buffers_full": 0,
+   "db_exec_s_per_s": 9.667,
+   "commits_per_s": 587.3,
+   "rows_inserted_per_s": 25642.8,
+   "wal_mb_per_s": 10.837,
+   "db_size_mb": 266.2,
+   "top_statements": [
+    {
+     "query": "select post_created_at, remote_followers from m6.publish_post($1, $2, $3, $4)",
+     "calls": 17277,
+     "total_exec_ms": 290663.8,
+     "mean_exec_ms": 16.824,
+     "rows": 17277,
+     "wal_bytes": 325846392.0
+    },
+    {
+     "query": "select u.id, u.display_name from m6.sessions s join m6.users u on u.id = s.user_id where s",
+     "calls": 344,
+     "total_exec_ms": 538.8,
+     "mean_exec_ms": 1.566,
+     "rows": 344,
+     "wal_bytes": 0.0
+    }
+   ]
+  }
+ },
+ "db_host": {
+  "shard_0": {
+   "cpu_busy_pct": 62.3,
+   "cpu_iowait_pct": 18.1,
+   "ncpu": 2,
+   "disk_write_mb_s": 37.98,
+   "disk_writes_per_s": 1884.7,
+   "disk_busy_pct": 154.1,
+   "load1_end": 5.66
+  }
+ }
+}

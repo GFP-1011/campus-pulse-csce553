@@ -1,0 +1,10 @@
+post & 1 & shard\_0 & CPU:running 0.75, IO:WalSync 0.25 \\
+post & 4 & shard\_0 & CPU:running 0.80, IO:WalSync 0.40, LWLock:WALWrite 0.20, IO:WalWrite 0.20 \\
+post & 8 & shard\_0 & CPU:running 1.00, IO:WalSync 0.27 \\
+post & 16 & shard\_0 & CPU:running 0.95, IO:WalSync 0.41, LWLock:WALWrite 0.09, Client:ClientRead 0.09 \\
+post & 32 & shard\_0 & CPU:running 2.93, LWLock:WALWrite 1.15, IO:WalSync 0.48, Client:ClientRead 0.15, LWLock:BufferContent 0.07 \\
+post & 48 & shard\_0 & CPU:running 4.32, LWLock:WALWrite 1.71, Client:ClientRead 0.68, IO:WalSync 0.65, LWLock:BufferContent 0.52 \\
+post & 64 & shard\_0 & CPU:running 6.71, LWLock:WALWrite 3.42, LWLock:BufferContent 1.42, IO:WalSync 0.65, Client:ClientRead 0.61 \\
+post & 96 & shard\_0 & CPU:running 10.26, LWLock:BufferContent 2.15, LWLock:WALWrite 1.74, LWLock:MultiXactGen 0.52, IO:WalSync 0.41 \\
+post & 128 & shard\_0 & CPU:running 7.47, LWLock:WALWrite 3.00, LWLock:BufferContent 2.09, IO:WalSync 0.50, Lock:extend 0.47 \\
+post & 256 & shard\_0 & CPU:running 8.70, LWLock:WALWrite 2.12, LWLock:BufferContent 2.03, Lock:extend 0.91, IO:WalSync 0.58 \\

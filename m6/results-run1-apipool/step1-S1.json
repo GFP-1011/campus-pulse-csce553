@@ -1,0 +1,87 @@
+{
+ "shard_0": {
+  "writes": [],
+  "top": [
+   [
+    "select post_created_at, remote_followers from m6.publish_post($1, $2, $3, $4)",
+    43333,
+    210291.0,
+    "4.853",
+    43333,
+    "800270283"
+   ],
+   [
+    "SELECT * FROM pgbouncer.get_auth($1)",
+    47,
+    523.0,
+    "11.121",
+    47,
+    "0"
+   ],
+   [
+    "truncate m6.feed_items, m6.likes, m6.post_tags, m6.posts",
+    7,
+    361.0,
+    "51.540",
+    0,
+    "113741"
+   ],
+   [
+    "select u.id, u.display_name from m6.sessions s join m6.users u on u.id = s.user_",
+    2767,
+    323.0,
+    "0.117",
+    2767,
+    "0"
+   ],
+   [
+    "DISCARD ALL",
+    29,
+    195.0,
+    "6.719",
+    0,
+    "0"
+   ],
+   [
+    "select coalesce(wait_event_type,$1), coalesce(wait_event,$2), count(*) from pg_s",
+    217,
+    168.0,
+    "0.772",
+    182,
+    "0"
+   ],
+   [
+    "select queryid::text, left(regexp_replace(query, $1, $2, $3), $4), calls, total_",
+    14,
+    133.0,
+    "9.468",
+    78,
+    "0"
+   ],
+   [
+    "select pg_database_size($1)",
+    14,
+    91.0,
+    "6.522",
+    14,
+    "0"
+   ],
+   [
+    "select xact_commit, xact_rollback, tup_inserted, tup_updated, tup_deleted, blks_",
+    14,
+    34.0,
+    "2.419",
+    14,
+    "0"
+   ],
+   [
+    "analyze m6.posts",
+    7,
+    23.0,
+    "3.256",
+    0,
+    "9066"
+   ]
+  ]
+ }
+}

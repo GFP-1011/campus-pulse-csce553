@@ -1,0 +1,185 @@
+﻿Sharding Worksheet: Choose Your Shard Key
+Oct 26, 2026 · @Arun Lakhotia
+Fill this in as a team before you create any Supabase project: the answers become your sharding plan.
+Team: ____________________  App: ☐ E-commerce ☐ Social media ☐ Event management  Date: ____________
+Work top to bottom. Each step uses one principle from the lecture; the hint under each step names it.
+Step 1 · List your busiest writes
+Write down the five user actions that change data most often during a busy hour. Reads (browsing, searching) do not go here.
+#
+	User action
+	SQL it runs (INSERT / UPDATE / DELETE, which tables)
+	How often in a busy hour
+	1
+	
+
+	
+
+	
+
+	2
+	
+
+	
+
+	
+
+	3
+	
+
+	
+
+	
+
+	4
+	
+
+	
+
+	
+
+	5
+	
+
+	
+
+	
+
+	Hint (Where writes come from): one action can run several statements; checkout, a follow, or a registration usually does.
+Step 2 · Find the owner of each write, and pick the shard key
+For each write in Step 1, ask: which rows must succeed or fail together with it? The thing those rows belong to is the owner.
+#
+	Rows that must change together
+	Owner (customer, author, event, …)
+	Owner's id column
+	1
+	
+
+	
+
+	
+
+	2
+	
+
+	
+
+	
+
+	3
+	
+
+	
+
+	
+
+	4
+	
+
+	
+
+	
+
+	5
+	
+
+	
+
+	
+
+	Our shard key: ______________________ (the owner most rows share)
+Test the key. Tick all three, or pick another key.
+* ☐ Every busy write already knows this value when it runs
+* ☐ The value never changes (not a name, email, or category)
+* ☐ It has many values that are not ranges of time (not sign-up order or dates)
+Hint (Keep together what is written together): every child table gets a column holding the owner's id, the way order_items got user_id.
+Step 3 · Check for a hot owner
+Hashing spreads many owners across shards, but it cannot split the writes of one owner. Name your worst case.
+* The busiest single owner we can imagine (a celebrity account, a sold-out event, a reseller bot): ______________________________
+* What it writes, how often: ______________________________
+* Which single row gets locked by every one of those writes (a counter, a seat count): ______________________________
+* Our plan: ☐ Insert rows instead of updating one counter ☐ Queue or rate-limit the burst ☐ Accept it and say why: ______________
+Hint (Capacity = the busiest shard): sharding helps many busy owners at once, not one very busy owner.
+Step 4 · Find the pages that read across owners
+List the pages that need rows from many owners at once ("my tickets", a home feed, an organizer dashboard, a global report). For each, choose a fix.
+Page
+	Rows it needs live on…
+	Fix
+	
+
+	
+
+	☐ Copy a small row to the reader's shard (written second, retried) ☐ Ask every shard and combine ☐ Search index
+	
+
+	
+
+	☐ Copy a small row to the reader's shard (written second, retried) ☐ Ask every shard and combine ☐ Search index
+	
+
+	
+
+	☐ Copy a small row to the reader's shard (written second, retried) ☐ Ask every shard and combine ☐ Search index
+	Shared, read-mostly tables to copy to every shard (like products): ______________________________
+Values that must be unique across the whole app (email, username) → these go in the directory: ______________________________
+Hint (Copy shared, rarely-changed data; detail-first publishing): the owner's shard holds the real record, and the copy is written second.
+Step 5 · Write the placement plan
+One row per table in your schema. This table is what you build from in Part 2 of the lecture.
+Table
+	Lives on (owner's shard / every shard / directory)
+	Routed by (column)
+	New column needed?
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	Buckets: 64 (never changes)  Shards: 2 → shard_0 owns buckets 0–31, shard_1 owns 32–63
+Before you start Part 2, check:
+* ☐ Every id column is a uuid
+* ☐ Every owned table has the owner's id
+* ☐ The shard check goes on the owner table (users, events, …)
+* ☐ The busiest transaction (checkout, register, post) touches only one shard
+* ☐ The instructor or TA has signed off: ____________

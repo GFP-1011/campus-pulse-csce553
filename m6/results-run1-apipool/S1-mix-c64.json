@@ -1,0 +1,103 @@
+{
+ "label": "S1-mix-c64",
+ "shards": 1,
+ "workload": "mix",
+ "concurrency": 64,
+ "started_utc": "2026-11-10T22:58:09.623583+00:00",
+ "duration_s": 30.421,
+ "attempts": 9902,
+ "successes": 9902,
+ "errors": 0,
+ "error_rate": 0.0,
+ "rps_success": 325.5,
+ "mean_ms": 194.8,
+ "p50_ms": 77.41,
+ "p95_ms": 456.93,
+ "p99_ms": 540.29,
+ "max_ms": 1059.87,
+ "by_kind": {
+  "feed:ok": 6925,
+  "like:ok": 2013,
+  "post:ok": 964
+ },
+ "ok_by_user_shard": {
+  "shard_0": 9902
+ },
+ "error_codes": {},
+ "api_cpu_mean_pct": 76.2,
+ "api_cpu_max_pct": 91.0,
+ "api_rss_max_mib": 574.0,
+ "db_active_backends_mean": {
+  "shard_0": 1.29
+ },
+ "db_top_waits": {
+  "shard_0": {
+   "CPU:running": 1.14,
+   "IO:WalSync": 0.14
+  }
+ },
+ "db": {
+  "shard_0": {
+   "xact_commit": 10479,
+   "xact_rollback": 0,
+   "tup_inserted": 45394,
+   "tup_updated": 18,
+   "tup_deleted": 7,
+   "blks_read": 6,
+   "blks_hit": 843116,
+   "wal_records": 149026,
+   "wal_bytes": 20425903.0,
+   "wal_buffers_full": 0,
+   "db_exec_s_per_s": 0.156,
+   "commits_per_s": 344.5,
+   "rows_inserted_per_s": 1492.2,
+   "wal_mb_per_s": 0.671,
+   "db_size_mb": 70.4,
+   "top_statements": [
+    {
+     "query": "select post_created_at, remote_followers from m6.publish_post($1, $2, $3, $4)",
+     "calls": 964,
+     "total_exec_ms": 3458.8,
+     "mean_exec_ms": 3.588,
+     "rows": 964,
+     "wal_bytes": 19511818.0
+    },
+    {
+     "query": "select post_id, author_id, preview, created_at from m6.feed_items where owner_id = $1 orde",
+     "calls": 6925,
+     "total_exec_ms": 1069.9,
+     "mean_exec_ms": 0.154,
+     "rows": 346250,
+     "wal_bytes": 0.0
+    },
+    {
+     "query": "insert into m6.likes (author_id, post_id, liker_id) values ($1,$2,$3) on conflict do nothi",
+     "calls": 2013,
+     "total_exec_ms": 197.3,
+     "mean_exec_ms": 0.098,
+     "rows": 1714,
+     "wal_bytes": 836081.0
+    },
+    {
+     "query": "select u.id, u.display_name from m6.sessions s join m6.users u on u.id = s.user_id where s",
+     "calls": 444,
+     "total_exec_ms": 9.9,
+     "mean_exec_ms": 0.022,
+     "rows": 444,
+     "wal_bytes": 0.0
+    }
+   ]
+  }
+ },
+ "db_host": {
+  "shard_0": {
+   "cpu_busy_pct": 8.7,
+   "cpu_iowait_pct": 3.6,
+   "ncpu": 2,
+   "disk_write_mb_s": 1.5,
+   "disk_writes_per_s": 106.5,
+   "disk_busy_pct": 16.2,
+   "load1_end": 0.45
+  }
+ }
+}

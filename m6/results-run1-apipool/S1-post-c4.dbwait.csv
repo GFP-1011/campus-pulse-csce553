@@ -1,0 +1,9 @@
+t_unix,shard,wait_type,wait_event,active
+1794350719.0393085,shard_0,CPU,running,3
+1794350719.0393085,shard_0,LWLock,BufferContent,1
+1794350723.0400891,shard_0,IO,WalSync,1
+1794350729.0416238,shard_0,CPU,running,1
+1794350731.0418396,shard_0,CPU,running,1
+1794350738.0440974,shard_0,CPU,running,1
+1794350742.044974,shard_0,CPU,running,1
+1794350747.046339,shard_0,CPU,running,1

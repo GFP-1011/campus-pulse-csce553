@@ -1,0 +1,35 @@
+{"utc": "2026-11-10T23:02:12.629819+00:00", "event": "series_start", "series": "S1", "commit": "7cd8ea8adee8782bec3ecf62581234587dfa5bb9"}
+{"utc": "2026-11-10T23:02:13.267155+00:00", "event": "m5_cron_paused", "jobs": [1]}
+{"utc": "2026-11-10T23:02:22.830367+00:00", "event": "api_started", "pid": 623931, "workers": 16, "pool_max_per_shard": 12, "children": 17}
+{"utc": "2026-11-10T23:02:25.833043+00:00", "event": "stage_start", "label": "S1-post-c1", "workload": "post", "concurrency": 1}
+{"utc": "2026-11-10T23:03:03.134046+00:00", "event": "stage_end", "label": "S1-post-c1", "rps": 12.007, "p99": 173.95, "err": 0.0}
+{"utc": "2026-11-10T23:03:18.754600+00:00", "event": "stage_start", "label": "S1-post-c4", "workload": "post", "concurrency": 4}
+{"utc": "2026-11-10T23:03:56.036075+00:00", "event": "stage_end", "label": "S1-post-c4", "rps": 48.537, "p99": 154.58, "err": 0.0}
+{"utc": "2026-11-10T23:04:11.638582+00:00", "event": "stage_start", "label": "S1-post-c8", "workload": "post", "concurrency": 8}
+{"utc": "2026-11-10T23:04:49.126995+00:00", "event": "stage_end", "label": "S1-post-c8", "rps": 97.792, "p99": 154.9, "err": 0.0}
+{"utc": "2026-11-10T23:05:05.059815+00:00", "event": "stage_start", "label": "S1-post-c16", "workload": "post", "concurrency": 16}
+{"utc": "2026-11-10T23:05:42.501591+00:00", "event": "stage_end", "label": "S1-post-c16", "rps": 195.888, "p99": 153.34, "err": 0.0}
+{"utc": "2026-11-10T23:05:58.294939+00:00", "event": "stage_start", "label": "S1-post-c32", "workload": "post", "concurrency": 32}
+{"utc": "2026-11-10T23:06:35.770649+00:00", "event": "stage_end", "label": "S1-post-c32", "rps": 360.145, "p99": 161.15, "err": 0.0}
+{"utc": "2026-11-10T23:06:52.729743+00:00", "event": "stage_start", "label": "S1-post-c64", "workload": "post", "concurrency": 64}
+{"utc": "2026-11-10T23:07:30.452596+00:00", "event": "stage_end", "label": "S1-post-c64", "rps": 418.154, "p99": 415.7, "err": 0.0}
+{"utc": "2026-11-10T23:07:46.187979+00:00", "event": "stage_start", "label": "S1-post-c128", "workload": "post", "concurrency": 128}
+{"utc": "2026-11-10T23:08:24.780557+00:00", "event": "stage_end", "label": "S1-post-c128", "rps": 459.497, "p99": 902.62, "err": 0.0}
+{"utc": "2026-11-10T23:08:40.496678+00:00", "event": "stage_start", "label": "S1-post-c256", "workload": "post", "concurrency": 256}
+{"utc": "2026-11-10T23:09:20.739650+00:00", "event": "stage_end", "label": "S1-post-c256", "rps": 428.027, "p99": 2417.75, "err": 0.0}
+{"utc": "2026-11-10T23:09:37.126770+00:00", "event": "stage_start", "label": "S1-post-c128-repeat", "workload": "post", "concurrency": 128}
+{"utc": "2026-11-10T23:10:15.602161+00:00", "event": "stage_end", "label": "S1-post-c128-repeat", "rps": 440.433, "p99": 831.26, "err": 0.0}
+{"utc": "2026-11-10T23:10:44.794580+00:00", "event": "stage_start", "label": "S1-like-c128", "workload": "like", "concurrency": 128}
+{"utc": "2026-11-10T23:11:23.062557+00:00", "event": "stage_end", "label": "S1-like-c128", "rps": 542.328, "p99": 739.82, "err": 0.0}
+{"utc": "2026-11-10T23:11:33.063899+00:00", "event": "stage_start", "label": "S1-feed-c128", "workload": "feed", "concurrency": 128}
+{"utc": "2026-11-10T23:12:11.367564+00:00", "event": "stage_end", "label": "S1-feed-c128", "rps": 630.255, "p99": 687.12, "err": 0.0}
+{"utc": "2026-11-10T23:12:21.369512+00:00", "event": "stage_start", "label": "S1-mix-c128", "workload": "mix", "concurrency": 128}
+{"utc": "2026-11-10T23:12:59.682869+00:00", "event": "stage_end", "label": "S1-mix-c128", "rps": 606.169, "p99": 690.7, "err": 0.0}
+{"utc": "2026-11-10T23:13:11.538028+00:00", "event": "m5_cron_restored", "jobs": [1]}
+{"utc": "2026-11-10T23:13:11.539719+00:00", "event": "series_end", "series": "S1"}
+{"utc": "2026-11-10T23:13:26.824017+00:00", "event": "series_start", "series": "S2", "commit": "7cd8ea8adee8782bec3ecf62581234587dfa5bb9"}
+{"utc": "2026-11-10T23:13:27.460414+00:00", "event": "m5_cron_paused", "jobs": [1]}
+{"utc": "2026-11-10T23:13:40.711492+00:00", "event": "api_started", "pid": 634854, "workers": 16, "pool_max_per_shard": 12, "children": 17}
+{"utc": "2026-11-10T23:13:43.713445+00:00", "event": "stage_start", "label": "S2-post-c1", "workload": "post", "concurrency": 1}
+{"utc": "2026-11-10T23:14:11.561918+00:00", "event": "m5_cron_restored", "jobs": [1]}
+{"utc": "2026-11-10T23:14:11.563188+00:00", "event": "series_end", "series": "S2"}

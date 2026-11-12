@@ -1,0 +1,61 @@
+\section{Discussion}\label{sec:discussion}
+
+\paragraph{Why not 2$\times$? Sharding split the rows, not the commits.}
+Per post, the one database applied 46 rows in 1.02 commits. After sharding each database applied 21 or 24 rows
+per post, about half, but still 1.03 commits per post: the author's shard commits \texttt{publish\_post()},
+and the other shard commits \texttt{fanout()} for the followers who live there. With 40 random followers per
+user, almost every post has followers on both shards. Commit-related waits (WALWrite, WalSync) were a large share
+of the single database's saturation (Figure~\ref{fig:waits}), and the commit rate each Nano disk must sustain went from
+587/s (one database at its peak) to 765/s per shard (two shards at their peak). Sharding therefore removed most of the
+CPU and lock contention from inserting and indexing rows. It did not remove the per-commit cost. The
+measured gain is 1.30--1.40$\times$, not the ideal 2$\times$ of an app whose writes stay with one owner (lecture
+slide~9, e-commerce).
+
+\paragraph{The cost of copy-at-write across shards.} The same design decision has a latency cost: one publish is
+two sequential round trips (Section~\ref{sec:results}), so at low and medium load users see a p50 of about 155~ms instead of 78~ms.
+The lecture accepts this ordering because the real record has to exist before its copies. Two fixes follow from the
+lecture's own principles:
+\begin{enumerate}[nosep,leftmargin=1.4em]
+\item \emph{Combine many small writes into fewer} (slide~25): queue the follower copies and apply them per shard
+      in batches, e.g.\ one \texttt{fanout()} transaction per shard every 50~ms carrying many posts. The post returns
+      after one round trip, and the second shard's commit rate drops from one per post to one per batch.
+\item \emph{Collect at read time} for authors with many followers (slide~50): no copies at all, so the publish is a
+      one-shard, one-commit transaction, and the feed read asks both shards and merges.
+\end{enumerate}
+We did not implement these. They change the semantics (feeds become eventually consistent within the batch interval),
+and the assignment asks for the lecture's ten steps.
+
+\paragraph{Hot shard and hot owner.} With 400 users, hashing gave a 45/55 split, and the busier shard limited the
+overloaded 256-client stage. More users would even this out; the lecture's 2{,}000-user test gave 1{,}008:992. One
+very busy owner, the worksheet's Step~3 celebrity, cannot be split by hashing: all of its likes land on one shard.
+Because likes are inserted as rows and never update a counter, they do not queue on a single row lock.
+
+\paragraph{Revised capacity statement.} With two Nano shards, Campus Pulse sustained about 700 posts/s
+($\approx$31{,}000--33{,}000 rows/s across both databases) with p99 $\le$ 400~ms, against 574 posts/s with p99 276~ms on one Nano database.
+The M2 1M-user model needs about 17 posts/s (10\% of 167 write RPS). Both configurations cover that, so for
+Campus Pulse at class scale sharding would be premature (``shard last'', slide~25). The numbers show what sharding
+buys once a single database is saturated: about 1.3--1.4$\times$ for this fan-out-heavy write. Writes that touch one
+owner (likes, sessions) should scale closer to 2$\times$, but our like test reached the API's $\approx$1{,}600~req/s ceiling
+before either shard saturated (+21\%), so we did not measure their limit.
+
+\paragraph{Confounds and limits.}
+\begin{itemize}[nosep,leftmargin=1.2em]
+\item \textbf{Shared free-tier hardware.} Nano projects run on shared hosts. Overloaded stages varied by up to 57\%
+      between repeats (256 clients, two shards); unsaturated stages repeated within 1\% (128 clients, two shards:
+      698 vs.\ 703 posts/s). We report repeats instead of averaging them.
+\item \textbf{30~s measurement windows} (M2 used 60~s) because a one-database stage writes $\approx$13~KB per post and
+      must stay below the 500~MB free-plan limit. Every stage starts from truncated tables.
+\item \textbf{Host metrics have 60~s resolution and are not aligned with stages}, so we show them as a timeline and use
+      the in-database 1~Hz samples for per-stage claims.
+\item \textbf{Two different Postgres patch versions} (17.6 on shard\_0, 17.11 on shard\_1); same region, same compute size;
+      round-trip times 73 and 75~ms.
+\item \textbf{Load generator and API on one lab server}, 75~ms from Supabase. The API ceiling (about 1{,}600 req/s for
+      requests that barely touch the database) is above every publish result we report. Hosted Render was not used
+      for M6 because its single free instance tops out near 15 requests/s (M2).
+\item \textbf{Closed-loop, uniform workload}: 40 followers per user and one fixed post body with three hashtags. Real
+      follower counts are skewed, which would make the hot-owner effects larger.
+\end{itemize}
+
+\paragraph{Housekeeping.} The M4/M4b experiment schemas (about 415~MB) were exported to compressed CSV and dropped
+from shard\_0 to make room; the M1/M2 \texttt{public} tables, the M5 \texttt{search} schema and the hosted app were
+not modified, and M5's cron refresh was re-enabled after each series.

@@ -1,0 +1,1136 @@
+CSCE 553 · SCALING THE DATABASE
+Scaling Writes by Splitting the Data
+Part 1  Principles: what to do, and why
+Part 2  Method: how to do it on Azure + Supabase
+Two parts today. Part 1 is ideas only: no code, no products. Every principle is stated as a rule you can follow, with the reason behind it. Part 2 turns those rules into steps on the Azure + Supabase setup your team already uses, with SQL you can paste into the Supabase SQL Editor.
+1
+
+WHERE WE ARE
+So far we made reads fast; today we make room for more writes
+✓
+Indexes
+Find rows without scanning the whole table
+✓
+Stored procedures
+Do several steps in one trip to the database
+✓
+Inverted indexes
+Search words inside text quickly
+All three speed up reads.
+Today
+What happens when shoppers send more changes than one database can apply?
+ 
+None of the read tricks above solves this. We need a different idea.
+2
+Recap. Indexes let a query find rows without scanning the table. Stored procedures cut round trips between app and database. Inverted indexes made text search fast. Every one of these helps a query that READS. None of them helps when the problem is too many changes arriving at once. That is today's problem.
+2
+
+PART 1 · PRINCIPLES
+First, where do writes come from?
+We follow one online store from a quiet evening to a sale day.
+3
+Part 1 has no code. We first build the problem, then the idea, then the rules.
+3
+
+THE RUNNING EXAMPLE
+Our store keeps everything in five tables in one database
+Your web app
+Django or FastAPI on Azure
+One database
+(Supabase)
+Table
+Belongs to
+users
+—
+products
+everyone (shared)
+cart_items
+a user (user_id)
+orders
+a user (user_id)
+order_items
+an order (order_id)
+Every table lives on one machine. Every change, from every shopper, goes to that one machine.
+4
+This is the schema your teams have seen. The app runs on Azure App Service; the data lives in one Supabase Postgres database. Point out the ownership: carts, orders, and order items all belong to a user. Products are shared by everyone. Keep this ownership in mind; it decides everything later.
+4
+
+WHERE WRITES COME FROM
+Every click that changes something becomes a write
+Shopper does
+Database does
+How often
+Browses products
+SELECT  (a read)
+Constantly
+Signs up
+INSERT into users
+Once per shopper
+Adds to cart
+INSERT into cart_items
+Many times per visit
+Changes quantity
+UPDATE cart_items
+Often
+Removes an item
+DELETE from cart_items
+Often
+Checks out
+INSERT orders + 1 INSERT per item
++ DELETE the cart
+Once per purchase, several writes
+Browsing is reads. Buying is writes, and the cart is where most of them happen.
+5
+Walk through a shopper's visit. Browsing only reads. Everything else changes rows. Notice that checkout is not one write but several: one order row, one row per item, and deleting the cart. Ask the class: which of these happens most often? Answer: cart changes. People add, remove and change quantities many times per purchase.
+5
+
+WHEN WRITES PILE UP
+A sale day multiplies writes, all in the same hour
+Quiet evening
+300 shoppers × 1 cart change a minute ≈ 5 writes/s
+ 
+Sale hour
+30,000 shoppers × 1 cart change a minute ≈ 500 writes/s
+plus every checkout writes several rows
+Writes grow with the number of people buying at the same moment, not with the size of the catalog.
+6
+Illustrative numbers, not a benchmark. Quiet evening: 300 shoppers, each changing the cart about once a minute: about 5 writes per second. Sale hour: 30,000 shoppers doing the same: about 500 writes per second, plus checkouts that each write several rows. The point is the shape: a hundred times more writes, concentrated in time, all aimed at the same database.
+6
+
+WHY ONE DATABASE RUNS OUT
+Each write costs the database real work on one machine
+1
+Lock the row
+so two shoppers can't change it at once
+2
+Change the table
+write the new row or new values
+3
+Update every index
+our read speed-ups now cost extra work
+4
+Log it and wait for disk
+so the change survives a crash
+One machine has a fixed budget: CPU, disk writes per second, and time spent waiting on locks. When writes arrive faster than that budget, they queue. Shoppers see slow or failed clicks.
+A bigger machine raises the limit, but there is always a largest machine, and its price grows faster than its speed.
+7
+Open the box on a single INSERT. The database locks the row so two people cannot change it at once. It changes the table. It updates every index on that table: the indexes we added in the first lecture make reads faster but make each write do more. Finally it records the change in its log and waits for the disk to confirm, so the change survives a crash. All of this happens on one machine with a fixed amount of CPU, disk speed and memory. A bigger machine raises the ceiling but does not remove it, and the price climbs faster than the capacity.
+7
+
+WHY READ TRICKS DON'T HELP
+Copies spread out reads, but every copy must still apply every write
+Reads: spread across copies
+App
+Main
+Copy 1
+Copy 2
+Writes: all land on the main database
+App
+Main
+Copy 1
+Copy 2
+replayed on copies
+To accept more writes, different machines must accept different writes. That is the idea we build next.
+8
+A common first reaction: add copies of the database (read replicas). Reads can go to any copy, so read capacity grows with each copy. But a write must happen on the main database and then be replayed on every copy, otherwise the copies would be wrong. So the main database still does all the writes. Indexes and caches also help reads only. The conclusion on the bottom bar is the key sentence of the lecture so far.
+8
+
+THE IDEA
+Split the rows so each database owns some of the customers
+Before: one database, all customers
+Ada
+Ben
+Cora
+Dev
+Eli
+Fay
+After: two databases, each owns half
+Ada
+Cora
+Eli
+Database A
+Ben
+Dev
+Fay
+Database B
+Same tables everywhere. Different rows in each. Each database accepts writes only for its own customers, so two databases give about twice the write room.
+9
+Same five tables on each database, but each database holds only some customers' rows. A write for a customer goes only to the database that owns that customer. With two databases, each one handles about half the writes; with four, about a quarter. Analogy: a grocery store with one checkout lane versus several lanes. Each shopper uses one lane, and the lanes work at the same time.
+9
+
+NAMING THE IDEA
+Call each piece a shard, and the splitting rule the shard key
+id
+name
+…
+1
+Ada
+2
+Ben
+3
+Cora
+4
+Dev
+Shard A
+Shard B
+cut between rows = “horizontal”
+Shard
+One database that holds a slice of the rows.
+Shard key
+The column the rule reads to pick the slice, for example the customer.
+Routing
+Applying the rule before every write or read, to pick the database to talk to.
+The words matter less than the rule: every row has exactly one home, and you can compute it.
+10
+Only now introduce the vocabulary, after the idea is clear. Shard: one database that holds a slice of the rows. Shard key: the column the rule looks at to decide the slice. Routing: applying the rule before every read or write, to pick which database to talk to. You will also read 'horizontal partitioning': horizontal because we cut the table between rows, not between columns.
+10
+
+A FIRST TRY
+Try the obvious rule: split customers by last name
+Last name A – M
+Davis, Garcia, Lopez …
+Shard A
+Last name N – Z
+Nguyen, Smith, Young …
+Shard B
+Why it feels right
+Every customer has a last name.
+Easy to explain.
+Looks like an even split of the alphabet.
+Before judging the rule, let's see how a write works under it.
+11
+Most students propose something like this, and it is a fine place to start. It is how orientation lines or exam rooms are often split. For this example, imagine users has a last_name column. Customers A through M live on shard A, N through Z on shard B. Don't criticise it yet: first see how writes work under it.
+11
+
+HOW A WRITE WORKS
+Route every write by its owner, then run ordinary SQL
+1  Who is writing?
+Maria Lopez (logged in)
+2  Apply the rule
+L is in A–M
+3  Pick the database
+Shard A
+4  Run the usual INSERT
+on shard A only
+Shard A
+busy with Maria
+Shard B
+free for others
+Rule: decide the shard before the write, from the row's owner. After that, the SQL is exactly what you wrote before.
+12
+Maria Lopez is logged in and clicks Add to cart. Step 1: the app already knows who is logged in. Step 2: apply the rule: L is in A to M, so shard A. Step 3: open a connection to shard A. Step 4: run exactly the INSERT you would have run before sharding. Shard B never hears about this write; it is free to serve someone else at the same moment. That is where the extra capacity comes from.
+12
+
+PRINCIPLE: KEEP TOGETHER WHAT IS WRITTEN TOGETHER
+Store a customer's cart and orders on that customer's shard
+users  Maria
+cart_items  Maria's 2 items
+orders  Maria's order
+order_items  that order's items
+Shard A
+Do: route child rows by their owner (user_id), not by their own id.
+Why: checkout stays one ordinary transaction on one database.
+Don't: put an order on one shard and its items on another.
+If you must, use detail-first publishing from the master-detail lecture.
+Consequence for the schema: order_items gets its own user_id column, so it can be routed like everything else.
+13
+Checkout writes an order, its items, and deletes the cart, all at once, and all of it must succeed or fail together. If all of Maria's rows live on shard A, checkout is one ordinary transaction on one database, exactly like the master-detail insert from the earlier lecture. If the order lived on A and the items on B, no single database could make them succeed or fail together; we would need the detail-first publishing trick from that lecture, and cleanup for orphans. So: route child rows by the owner, not by their own id. This means order_items needs a user_id column too.
+13
+
+PRINCIPLE: COPY SHARED, RARELY-CHANGED DATA
+Copy small, read-mostly tables to every shard
+products
+(full copy)
+customer rows
+(own slice)
+Shard A
+products
+(full copy)
+customer rows
+(own slice)
+Shard B
+Admin edits a price
+Do: copy tables that are small, read by everyone, and rarely written.
+Cost: each change is written to every shard.
+Win: cart and order queries still join with products on one database.
+Don't: copy data that changes on every purchase, such as stock counts.
+Ownership decides placement: owned rows go to the owner's shard; shared, read-mostly rows go everywhere.
+14
+Products are shared by every customer, so they cannot 'belong' to one shard. But they are small and change rarely (an admin edits a price now and then), while customers read them constantly. So keep a full copy on every shard. The cost: a product change must be applied to every shard. The win: carts and orders can still join with products locally, and prices are copied into order_items at checkout, so later price changes don't alter old orders. This only works for read-mostly data. A table that changes on every purchase, such as a stock counter, does not fit this rule.
+14
+
+PROBLEM 1 WITH OUR FIRST RULE
+Last names do not split evenly, so one shard runs hot
+7
+A – M  →  Shard A
+Johnson, Brown, Jones, Garcia, Miller, Davis, Martinez
+3
+N – Z  →  Shard B
+Smith, Williams, Rodriguez
+The 10 most common US surnames (2010 Census)
+Capacity = the busiest shard
+If shard A gets 70% of the writes, it hits its limit while shard B sits partly idle. Adding shards doesn't fix a rule that piles customers into one of them.
+Don't pick a key whose values cluster. Real-world names, cities, and categories always cluster.
+15
+The 10 most common US surnames in the 2010 Census: Smith, Johnson, Williams, Brown, Jones, Garcia, Miller, Davis, Rodriguez, Martinez. Seven of them start with A through M. The alphabet splits evenly; people do not. And your customers are not the national average: a store popular in a community where many people share a surname (Nguyen, Kim, Patel) can overload a single shard. The key lesson: the system is only as fast as its busiest shard. An idle shard B does not help a shard A that is overloaded.
+15
+
+PROBLEM 2 WITH OUR FIRST RULE
+Last names change, and a changed key means moving rows
+Maria Lopez
+L → Shard A
+marries
+Maria Smith
+S → Shard B
+Shard A
+all her rows
+Shard B
+rule says here
+user, cart, every order must move
+Same trap, different cause
+Fixing the imbalance by moving the boundary (A–K / L–Z) also moves every customer whose name starts with L or M.
+Don't use a key that can change. Moving a customer's rows between databases is slow and error-prone.
+16
+Maria Lopez gets married and becomes Maria Smith. The rule now says shard B, but her user row, carts, and past orders are on shard A. Either every one of her rows moves across databases, or the rule stops being true. The same happens when you try to fix the imbalance by moving the boundary from M to K: every customer between L and M moves. Both say the same thing: the key should be something that never changes.
+16
+
+ANOTHER OBVIOUS RULE
+Splitting by sign-up order sends every new customer to one shard
+Shard A: ids 1 – 100,000
+older customers · few writes today
+Shard B: ids 100,001 and up
+every new sign-up, first cart, first order
+older → newer customers
+Rows look even
+Each shard holds 100,000 customers.
+Work is not even
+Today's writes come mostly from new customers, so shard B takes nearly all of them.
+Don't split by ranges of anything that grows with time: ids, sign-up dates, order dates.
+17
+A second common proposal: customers 1 to 100,000 on shard A, 100,001 and up on shard B. The split by count looks even. But who is buying today? Mostly recent and new customers: new sign-ups, first carts, welcome-discount orders. They all land on the newest shard. The old shard holds many rows but few writes. Even rows, uneven work. And every time the newest shard fills, the hot spot simply moves to the next one.
+17
+
+WHAT A GOOD KEY LOOKS LIKE
+Choose a key that every write carries, never changes, and spreads evenly
+Candidate key
+Known at every write?
+Never changes?
+Spreads evenly?
+Last name ranges
+✓
+✗
+✗
+Sign-up order (id ranges)
+✓
+✓
+✗
+Email
+✓
+✗
+clusters by domain
+Customer id, scrambled
+✓
+✓
+✓
+Do: shard by the customer's id, the one value every customer write already has and that never changes.
+18
+Turn the three failures into three tests. 1: the key must be known at the moment of the write. The logged-in customer is known on every cart and checkout write. 2: it must never change. 3: its values must spread writes evenly across shards. Last name fails 2 and 3. Sign-up ranges fail 3. Email fails 2 (people change emails) and still clusters by domain. The customer's id, scrambled, passes all three. Next slide shows the scrambling.
+18
+
+PRINCIPLE: SCRAMBLE THE KEY
+Hash the customer id, then use the remainder to pick a shard
+Customer id
+hash(id)
+÷ 2, remainder
+Shard
+1001
+3,099,819,571
+1
+B
+1002
+4,222,212,225
+1
+B
+1003
+2,858,993,500
+0
+A
+1004
+4,275,254,162
+0
+A
+1005
+596,063,099
+1
+B
+1006
+2,454,078,541
+1
+B
+1,008 : 992
+customers per shard when we hashed 2,000 test sign-ups into two shards
+Neighbouring ids land on different shards.
+Same id → same shard, every time. Names, sign-up order, and popularity no longer decide placement.
+19
+A hash function turns any value into a large, random-looking number. Two properties matter: the same input always gives the same number, so the rule is repeatable; and nearby inputs give unrelated numbers, so customers 1001 and 1002 do not end up together. Take the remainder after dividing by the number of shards: with two shards, remainder 0 means shard A, 1 means shard B. The hash values on this slide are real (first 8 hex digits of MD5, as a number). With a handful of customers the split looks lumpy; with thousands it evens out. In our test with 2,000 sign-ups, the split was 1,008 and 992.
+19
+
+PRINCIPLE: PLAN FOR GROWTH
+Hash into many fixed buckets, then map buckets to shards
+Today: 64 buckets, 2 shards
+Later: add shard C
+A  B  C   one square = one bucket
+bucket = hash(id) ÷ 64, remainder. Never changes.
+A small map says which shard owns each bucket. Only the map changes.
+Adding a shard moves whole buckets, not two thirds of all rows.
+Don't divide by the number of shards directly. Divide by a fixed bucket count and keep a bucket-to-shard map.
+20
+Problem with 'remainder by number of shards': when you go from 2 shards to 3, the remainder changes for most customers. For a random hash, it stays the same for only about 1 in 3 customers, so about two thirds of all rows would move. Fix: divide by a fixed number of buckets that never changes, say 64. Each customer always has the same bucket. A small table says which shard owns each bucket. To add a shard, hand it some buckets; only the rows in those buckets move, and they move as whole groups. In the picture, going to three shards moves about a third of the buckets, which is the least possible.
+20
+
+PRINCIPLE: IDENTITY WITHOUT A CENTRAL COUNTER
+Let any machine create ids without asking anyone
+Counter on each shard
+Shard A creates order 17.  Shard B creates order 17.
+Two different orders, same id.
+One shared counter
+Every write in the system waits on one place: the bottleneck is back.
+UUID: a random 128-bit id
+Any shard, any app server can create one alone.
+Known before the INSERT, so we can route by it.
+ 
+bd72cdf2-1eb2-443a-bee1-dd81601f32b6
+4961e826-a967-473a-96d4-86f92452719b
+Do: use UUIDs for every table's id. Don't depend on one shared counter, or the bottleneck returns.
+21
+Today our tables use auto-increment integer ids: the database hands out 1, 2, 3. With two shards, each shard has its own counter, so shard A and shard B both create order 17; any report that combines them is confused. One shared counter would fix that, but then every write in the system stops to ask one place for the next number: the single bottleneck we were trying to remove. The fix is a UUID: a 128-bit random id that any machine can make on its own; the chance of two being equal is negligible. Bonus: the id exists before the INSERT, so we can route by it. UUIDs are bigger and unordered, which costs some index space; we accept that.
+21
+
+PRINCIPLE: ONE SMALL LOOKUP FOR LOGIN
+Keep a small directory that maps email to customer id
+Login form
+maria@…
+Directory
+email → customer id → shard
+Customer's shard
+check password,
+then everything else
+Do: keep email → id in one small directory, and make email unique there.
+Why it's safe: only sign-up and login touch it; cart and checkout never do.
+Do: after login, keep the customer id and shard in the session.
+Central data is fine when it is small and rarely written. The busy writes still go straight to a shard.
+22
+A gap in the plan: at login the customer types an email, not an id. Which shard should we ask? We keep one small table, the directory, that maps email to customer id; the id gives the bucket and the bucket map gives the shard. The directory also guarantees each email is used once across the whole system, which a uniqueness rule inside one shard cannot do. Isn't this one central table a new bottleneck? It is touched at sign-up and login only, which are rare compared to cart writes. After login, keep the id and shard in the session.
+22
+
+PRINCIPLE: FAIL LOUDLY
+Make each shard refuse rows that do not belong to it
+Shard A
+accepts buckets 0–31 only
+Customer in bucket 16
+✓ accepted
+Customer in bucket 37
+✗ rejected: routing bug caught
+Do: put a check on the customer table of each shard.
+Carts, orders and items are covered automatically: they must point to a customer on the same shard.
+A wrong-shard write should be an error today, not a missing order next month.
+23
+With routing in the app, one bug can write a customer to the wrong shard. Nothing breaks at first; later the customer's orders seem to vanish, because every read goes to the correct shard and finds nothing. Give each shard a rule: a customer row is accepted only if its bucket is one this shard owns. Then the cart, order, and item rows are covered too, because they must point at a customer row on the same database. A routing bug becomes an immediate error instead of silent lost data.
+23
+
+WHAT WE GIVE UP
+Expect questions about all customers to get harder
+Questions across customers
+All pending orders, today's revenue, best sellers: every shard holds part of the answer.
+Rules across customers
+“Email is unique” needs the directory; one shard can't enforce it alone.
+One very busy customer
+Hashing spreads customers, not one customer's own load.
+Still easy
+Anything about one customer: their cart, their orders, checkout.
+Before you shard, list your app's pages: which are about one customer, and which are about everyone?
+24
+Be honest about the price. Anything keyed by one customer is now easy and fast. Anything that spans customers is now spread over every shard: 'all pending orders', 'today's revenue', 'best-selling product'. You must ask every shard and combine the answers. Also, hashing spreads customers, not the work of one customer: a reseller bot hammering one account still lands on one shard. These are topics for later lectures; for now, notice which of your app's pages are per-customer and which are global.
+24
+
+PRINCIPLE: SHARD LAST
+Measure first, and try the cheaper fixes before you shard
+1
+Measure: are writes really the bottleneck?
+2
+Fix slow writes; drop unused indexes
+3
+Combine many small writes into fewer
+4
+Move to a bigger database plan
+5
+Shard
+Don't shard on a hunch. Each step to the left is cheaper and easier to undo than the next.
+25
+Sharding is hard to undo and touches every query in the app, so it is the last step, not the first. First confirm writes are the bottleneck by measuring. Then try the cheap fixes: speed up slow write statements and drop indexes nobody uses (each index costs every write), group many small writes into fewer statements, and move to a bigger database plan. Shard when those are exhausted, or when you can see growth that will exhaust them.
+25
+
+PRINCIPLES SUMMARY
+The principles in one page
+Do
+Measure, and try cheaper fixes, before sharding
+Split rows so each database owns some customers
+Route every write by its owner, decided before the write
+Keep a customer's cart, orders and items on one shard
+Copy small, read-mostly tables (products) to every shard
+Hash the customer id into fixed buckets; map buckets to shards
+Use UUIDs for ids
+Keep a small email → id directory for login
+Make each shard reject rows that aren't its own
+Don't
+Shard on names, emails, or categories: they change and cluster
+Split by ranges of ids or dates: new activity piles onto one shard
+Divide by the number of shards directly
+Depend on one shared id counter
+Put an order and its items on different shards
+26
+Read these aloud as the rules for the project. Every rule on the left came from a specific failure we saw: uneven names, changing names, hot new sign-ups, colliding counters, misrouted rows.
+26
+
+PART 2 · METHOD
+How to do it on Azure + Supabase
+Ten steps. Every SQL statement here runs in the Supabase SQL Editor; swap in your own ids.
+27
+From here on, each slide is one step, and its title is the instruction. Part 1 told you what and why; Part 2 tells you how. The full SQL is in the handout file sharding_setup.sql.
+27
+
+THE TARGET
+What you will build
+Browser
+Azure App Service
+your Django / FastAPI app
+ 
+holds 2 connection strings; picks one per request
+shard_0
+shard_1
+Supabase project 1
+buckets 0–31
++ directory
+Supabase project 2
+buckets 32–63
+Free plan: 2 active projects per account, 500 MB each, paused after a week of inactivity. Keep the directory in shard_0 for class.
+28
+Two Supabase projects, each a full Postgres database, act as shard 0 and shard 1. The Supabase free plan allows two active projects per account, so for the class project the small directory tables live inside shard 0's database. In production the directory would be its own database. Your app on Azure App Service holds one connection string per database and picks one for each request. Routing happens in your app; Supabase does not know it is sharded.
+28
+
+STEP 1
+Confirm that writes are your bottleneck before you change anything
+-- Turn on statement statistics (once per project)
+create extension if not exists pg_stat_statements
+  with schema extensions;
+ 
+-- Which write statements cost the most time?
+select left(query, 60)         as statement,
+       calls,
+       round(total_exec_time)  as total_ms
+from extensions.pg_stat_statements
+where query ~* '^\s*(insert|update|delete)'
+order by total_exec_time desc
+limit 10;
+Dashboard: Reports → Database. Watch CPU and disk during busy hours.
+SQL Editor: run the query on the left.
+Continue only if writes top the list after the cheaper fixes.
+Principle applied: measure first, shard last.
+29
+In the Supabase dashboard, open Reports and look at the database CPU and disk activity during busy periods. Then run this query. pg_stat_statements records every statement the database has run, with how often and how long. The filter keeps INSERT, UPDATE and DELETE. If the top of the list is reads, go back to indexes; if it is writes and the cheaper fixes from Part 1 are done, continue.
+29
+
+STEP 2
+Write down where every table goes before you create anything
+Table
+Where it lives
+Routed by
+users
+owner's shard
+id
+cart_items
+owner's shard
+user_id
+orders
+owner's shard
+user_id
+order_items
+owner's shard
+user_id  (new column)
+products
+full copy on every shard
+— (same rows everywhere)
+user_directory, bucket_map
+shard_0 (the home database)
+—
+Fixed numbers
+Buckets: 64 (never changes)
+
+Shards: 2
+shard_0 owns buckets 0–31
+shard_1 owns buckets 32–63
+Principles applied: keep a customer's rows together; copy read-mostly tables; fixed buckets.
+30
+This table is the design. Every later step follows from it. Decide the bucket count now and never change it; 64 is plenty for a class project and leaves room for up to 64 shards.
+30
+
+STEP 3
+Create one Supabase project per shard, in your app's region
+1
+Supabase dashboard → New project
+2
+Name it store-shard-0; save the database password
+3
+Region: the one closest to your Azure App Service
+4
+Repeat for store-shard-1, same region
+Free plan limits
+2 active projects per account
+500 MB database each
+Paused after 1 week without activity
+Each project is a separate Postgres server with its own CPU and disk: that is where the extra write room comes from.
+31
+Create two projects: store-shard-0 and store-shard-1. Pick the same region for both, as close as possible to your Azure App Service region (for example, an East US App Service with a US East Supabase region). Every request crosses from Azure to Supabase, so distance adds delay to every query. Save each database password; you need it for the connection strings in step 7.
+31
+
+STEP 4
+Run the same schema file on every shard
+-- shard_schema.sql  (excerpt; same file on every shard)
+create or replace function shard_bucket(u uuid)
+returns int language sql immutable as $$
+  select (('x' || substr(md5(u::text), 1, 8))
+          ::bit(32)::bigint % 64)::int
+$$;
+ 
+create table order_items (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null,            -- new: the owner
+  order_id   uuid not null,
+  product_id uuid not null references products(id),
+  quantity   int  not null,
+  price      numeric(10,2) not null,
+  foreign key (user_id, order_id)
+    references orders(user_id, id)
+);
+One file, every shard. Paste it into each project's SQL Editor.
+Every id is a uuid made by gen_random_uuid().
+Every owned table has user_id.
+products keeps a normal foreign key because each shard has its own copy.
+32
+Keep one file, shard_schema.sql, in your repo, and paste it into the SQL Editor of each shard. Never edit one shard by hand; drift between shards causes bugs that only appear for some customers. Shown here are the two parts that are new compared with your current schema. First, shard_bucket: md5 of the id, first 8 hex digits as a number, remainder after dividing by 64. It is marked IMMUTABLE because the same input always gives the same output. Second, order_items now carries user_id, and its foreign key points to orders by (user_id, id), so an item can only attach to an order of the same customer on the same shard. ids are uuid. The full file is in the handout.
+32
+
+STEP 5
+Give each shard a check that rejects other shards' customers
+On shard_0 only
+alter table users
+  add constraint users_belong_here
+  check (shard_bucket(id) between 0 and 31);
+On shard_1 only
+alter table users
+  add constraint users_belong_here
+  check (shard_bucket(id) between 32 and 63);
+Test it on shard_0: this id is in bucket 37, so it must fail
+insert into users (id, email, hashed_password)
+values ('1d25ffe5-b534-402c-b01d-1b8cd2735f23', 'test@example.com', 'x');
+Principle applied: fail loudly. One check on users protects carts, orders and items through their foreign keys.
+33
+This is the only part that differs between shards. Each shard gets a check on users that accepts only the buckets it owns. Because cart_items and orders reference users on the same database, and order_items references orders, every owned row is protected by this one check. Try it: insert a user whose id falls in bucket 37 on shard_0 and watch it fail with 'violates check constraint users_belong_here'. When you add a shard later, you change these ranges.
+33
+
+STEP 6
+Create the directory and the bucket map on shard_0
+-- Run on shard_0 only
+create table user_directory (
+  email   text primary key,                 -- lower-case
+  user_id uuid not null unique default gen_random_uuid()
+);
+ 
+create table bucket_map (
+  bucket int  primary key check (bucket between 0 and 63),
+  shard  text not null
+);
+ 
+insert into bucket_map (bucket, shard)
+select b, case when b < 32 then 'shard_0' else 'shard_1' end
+from generate_series(0, 63) as b;
+user_directory: one row per customer; email is unique system-wide.
+bucket_map: 64 rows; the only thing you edit when you add a shard.
+Check: select shard, count(*) from bucket_map group by shard;  → 32 and 32
+34
+Run this on shard_0 only (the home database). user_directory maps a lower-cased email to the customer's id; the primary key on email enforces one account per email across the whole system. bucket_map has 64 rows saying which shard owns each bucket. The INSERT fills it with generate_series: buckets below 32 go to shard_0, the rest to shard_1. The directory also needs the shard_bucket function, which shard_0 already has from step 4.
+34
+
+STEP 7
+Store every connection string in Azure settings, never in code
+1
+Supabase: Connect → Session pooler
+copy the string for each project (works over IPv4)
+2
+Azure portal: App Service → Settings → Environment variables
+add one app setting per shard
+3
+Name settings after bucket_map's shard names
+the app maps 'shard_1' to SHARD_1_URL
+App setting
+Value
+SHARD_0_URL
+shard_0 pooler string
+SHARD_1_URL
+shard_1 pooler string
+DIRECTORY_URL
+same as SHARD_0_URL for class
+Passwords stay out of git, and moving the directory to its own database later is a settings change, not a code change.
+35
+In Supabase, click Connect on each project and copy the Session pooler connection string. Supabase's direct connection uses an IPv6 address, and an App Service may not reach IPv6, so the pooler string, which works over IPv4, is the safe choice. In the Azure portal, open your App Service, then Settings, Environment variables, and add one app setting per shard. Your app reads them as environment variables. The names should match the shard names in bucket_map, so the app can go from 'shard_1' straight to the right setting.
+35
+
+STEP 8
+Load products onto every shard with the same ids
+-- Run the SAME statement on shard_0 and on shard_1
+insert into products (id, name, price)
+values ('7b0c2f6e-3a52-4f7e-9c11-2d4e8a6b9f01',
+        'Blue Trail Backpack', 49.00)
+on conflict (id) do update
+  set name  = excluded.name,
+      price = excluded.price;
+Same id on every shard, so carts everywhere point at the same product.
+Safe to re-run: if one shard missed the change, run it again there.
+Price edits use this same statement.
+Check that the shards agree:
+select count(*), sum(price) from products;  -- same answer on each shard
+36
+Products are copied to every shard, so a product must have the same id everywhere; otherwise a cart on shard_0 and a cart on shard_1 would refer to the same backpack by different ids. Generate the uuid once (here it is written out) and run the same statement on each shard. The ON CONFLICT clause makes the statement safe to re-run: if the row exists, it is updated instead of duplicated. That matters because writing to two databases can fail halfway; the fix is to run it again on the shard that missed it. Price edits use the same statement.
+36
+
+STEP 9 · WRITES
+Sign up in two steps: reserve the email, then insert the customer on its shard
+A · on the directory (shard_0)
+insert into user_directory (email)
+values (lower('Maria.Lopez@example.com'))
+returning user_id,
+  (select shard from bucket_map
+   where bucket = shard_bucket(user_id)) as shard;
+-- e.g. user_id = bd72cdf2-1eb2-443a-bee1-dd81601f32b6, shard = shard_0
+B · on the shard returned by A
+insert into users (id, email, hashed_password)
+values ('bd72cdf2-1eb2-443a-bee1-dd81601f32b6',
+        'maria.lopez@example.com', '<hash from your app>');
+If B fails, retry B with the same id. Never create a second id for the same email.
+37
+Step A runs on the directory. It inserts the email, lets the database create the uuid, and returns both the id and the shard by looking up the bucket. If the email exists, the primary key rejects it: that is your 'email already registered' message. Step B runs on the shard that step A named. If step B fails (network, timeout), don't create a new id: retry step B with the same id from the directory. This is the same detail-first idea as the master-detail lecture: the reservation exists first, and the customer becomes real when step B succeeds. In your app, the literal values become query parameters.
+37
+
+STEP 9 · WRITES
+Write cart changes as one statement on the customer's shard
+Add to cart (or add one more)
+insert into cart_items (user_id, product_id, quantity)
+values ('bd72cdf2-1eb2-443a-bee1-dd81601f32b6',
+        '7b0c2f6e-3a52-4f7e-9c11-2d4e8a6b9f01', 1)
+on conflict (user_id, product_id)
+  do update set quantity = cart_items.quantity + excluded.quantity;
+Change quantity, remove an item
+update cart_items set quantity = 3
+where user_id    = 'bd72cdf2-1eb2-443a-bee1-dd81601f32b6'
+  and product_id = '7b0c2f6e-3a52-4f7e-9c11-2d4e8a6b9f01';
+-- remove: delete from cart_items  + the same where clause
+Always include user_id in the WHERE clause. The shard comes from the session; no directory lookup per click.
+38
+After login, the session holds the customer's id and shard, so cart writes need no directory lookup. Adding an item is an upsert: insert the row, or if this customer already has this product in the cart, add to the quantity. Removing and changing quantity are ordinary UPDATE and DELETE with user_id in the WHERE clause. Always include user_id in the WHERE clause: it is how you know you are touching only this customer's rows.
+38
+
+STEP 9 · WRITES
+Check out with one stored procedure on the customer's shard
+create or replace function checkout(p_user uuid)
+returns uuid language plpgsql as $$
+declare v_order uuid := gen_random_uuid();
+begin
+  perform 1 from cart_items
+    where user_id = p_user for update;
+  if not found then raise exception 'cart is empty'; end if;
+  insert into orders (id, user_id) values (v_order, p_user);
+  insert into order_items
+    (user_id, order_id, product_id, quantity, price)
+  select p_user, v_order, c.product_id, c.quantity, p.price
+  from cart_items c join products p on p.id = c.product_id
+  where c.user_id = p_user;
+  update orders set total_amount =
+    (select sum(quantity * price) from order_items
+     where order_id = v_order)
+  where id = v_order;
+  delete from cart_items where user_id = p_user;
+  return v_order;
+end $$;
+The app's only call:
+select checkout(
+ 'bd72cdf2-1eb2-443a-bee1-dd81601f32b6');
+One database, one transaction
+Locks the cart so it can't change mid-checkout
+Price copied from the local products copy
+All or nothing: any error undoes every step
+39
+Checkout is the master-detail insert from earlier, and because everything belongs to one customer on one shard, it is a single local transaction. Put it in a stored procedure (the second lecture) installed on every shard by shard_schema.sql. It locks the cart rows so the cart can't change mid-checkout, creates the order, copies each cart line into order_items with the product's current price, computes the total, and empties the cart. A Postgres function runs as one transaction: if any step fails, none of it happens. The app makes one call on the customer's shard.
+39
+
+STEP 10 · READS
+Read the same way: find the shard, then run ordinary SQL
+Login · on the directory
+select d.user_id, m.shard
+from user_directory d
+join bucket_map m on m.bucket = shard_bucket(d.user_id)
+where d.email = lower('Maria.Lopez@example.com');
+My orders · on the customer's shard
+select o.id, o.created_at, p.name, i.quantity, i.price
+from orders o
+join order_items i on i.user_id = o.user_id and i.order_id = o.id
+join products p    on p.id = i.product_id
+where o.user_id = 'bd72cdf2-1eb2-443a-bee1-dd81601f32b6'
+order by o.created_at desc limit 20;
+Keep user_id and shard in the session; every page about one customer is then a one-shard query.
+40
+Login: one directory query returns the customer's id and shard together. Store both in the session; every later request uses them. Then check the password on the customer's shard. Order history: an ordinary query, joined with products, on the customer's shard; the join works because products is copied there. The index on orders (user_id, created_at) from shard_schema.sql makes it fast.
+40
+
+CHECK YOUR WORK
+Verify the split before you trust it
+On each shard: customers here
+select count(*) from users;
+On shard_0: customers per shard
+select m.shard, count(*)
+from user_directory d
+join bucket_map m on m.bucket = shard_bucket(d.user_id)
+group by m.shard;
+On each shard: rows on the wrong shard (expect 0)
+select count(*) from users
+where shard_bucket(id) not between 0 and 31;  -- shard_0
+-- on shard_1 use: not between 32 and 63
+Expect close, not identical, counts: our 2,000-user test gave 1,008 and 992.
+41
+Run these after loading test users. The first two should give roughly equal counts. The third must return zero on each shard; if not, rows were written before the check from step 5 existed. Finally, run the bad insert from step 5 to prove the check works. If the counts are very uneven with many users, the bucket function differs between your shards: re-run shard_schema.sql.
+41
+
+LATER
+Add a shard by moving whole buckets, then updating the map
+1
+Create store-shard-2; run shard_schema.sql; copy products
+2
+Choose buckets to move, e.g. every third bucket
+3
+Pause writes for those buckets; copy their users, carts, orders, items
+4
+Update bucket_map to point those buckets to shard_2
+5
+Update each shard's users_belong_here check
+6
+Delete the moved rows from the old shards; resume writes
+Needs a 3rd project
+The free plan allows 2 active projects, so this step needs a paid plan or a second account.
+Only bucket_map and the checks change. The bucket function and every customer's bucket stay the same.
+42
+When two shards are no longer enough. Note this needs a third Supabase project, so a paid plan or another account. The order matters: the new shard gets its schema first; rows are copied before the map changes; the old shard's check is narrowed and rows deleted only after the map points to the new shard. Copying between Supabase projects can be done with pg_dump of the selected rows, or the postgres_fdw extension; that is beyond today. Moving buckets one at a time keeps each move small.
+42
+
+METHOD SUMMARY
+The method in one page
+1
+Measure: confirm writes are the bottleneck
+2
+Write the placement table; fix buckets at 64
+3
+Create two Supabase projects, same region as Azure
+4
+Run shard_schema.sql on every shard
+5
+Add each shard's users_belong_here check
+6
+Create user_directory and bucket_map on shard_0
+7
+Put pooler strings in Azure app settings
+8
+Load products on every shard, same ids
+9
+Writes: sign-up (2 steps), cart upserts, checkout()
+10
+Reads: login lookup once; per-customer SQL on the shard
+Then verify: equal-ish counts, zero wrong-shard rows, and a rejected bad insert.
+43
+Hand this to your team as the checklist. Steps 1 to 8 are setup, done once. Step 9 and 10 change how your app talks to the database: every request first decides the shard, then runs the SQL it always ran.
+43
+
+APPENDIX · SOCIAL MEDIA AND EVENT MANAGEMENT
+Same principles, different owners
+E-commerce was the easy case: almost every write belongs to one customer. Social media and event apps write across owners.
+44
+The lecture used e-commerce because its writes are owned by one customer and customers rarely write to each other's data. The other two project types are harder in specific, predictable ways. The procedure on the next slide is the same for all three; the worksheet walks each team through it.
+44
+
+APPLYING THE PRINCIPLES
+Run the same five-step procedure on any app
+1
+List the busiest writes   the “every click becomes a write” table for your app
+2
+Find the owner of each write   what must succeed or fail together with it?
+3
+Shard by the owner   every child row carries the owner's id
+4
+Check for a hot owner   one key that hashing cannot split
+5
+Find reads from the other side   plan a small copy on the reader's shard
+Team worksheet
+Each team fills in these five steps for its own app before starting Part 2.
+The owner is whatever must stay correct inside one transaction. Find it first; the rest follows.
+45
+This is the procedure the team worksheet follows. Step 2 is the heart of it: the owner is whatever must stay correct inside one transaction. For e-commerce that is the customer's cart and order; for events it is the event's seat count; for social media it is the post and its likes and comments. Step 4 is where most surprises come from: one owner that is far busier than the rest.
+45
+
+THREE APPS SIDE BY SIDE
+Find the owner first; the rest of the design follows
+E-commerce
+Social media
+Event management
+Busiest writes
+cart changes, checkout
+likes, comments, follows, posts
+registrations when tickets open
+Must stay consistent
+a customer's cart and order
+a post and its comments / likes
+an event's seat count and its registrations
+Shard key
+user_id
+author's user_id
+event_id
+Hot-spot risk
+one heavy buyer (rare)
+celebrity post or account
+a popular event's ticket drop
+Cross-shard pain
+reports across customers
+follows; the home feed
+“My tickets” for an attendee
+The shard key is the decision. Every other row is a consequence of it.
+46
+Read across a row to compare. The shard key row is the decision; every other row is a consequence of it. Note the hot-spot row: in e-commerce it is rare, in the other two it is the normal way the app gets busy.
+46
+
+SOCIAL MEDIA · PRINCIPLE
+Shard posts by author, and keep likes and comments with the post
+posts  Ben's post
+likes  Ana, Cy
+comments  Ana: “Nice!”
+Ben's shard
+Do: route likes and comments by the post's author, not by who clicked.
+Why: a post and its counts are shown together, so they are read with one query on one shard.
+Don't: put Ana's like on Ana's shard; Ben's post would then need every shard to count its likes.
+Same rule as order_items: a child row goes where its parent's owner lives.
+47
+Ben writes a post; it lives on Ben's shard because Ben is the author. When Ana and Cy like it, the like rows go to Ben's shard too, not to theirs, because showing the post means showing its likes and comments, and that should be a one-shard query. This is the order_items rule again: the child row is routed by the owner of the parent. The app knows the post's author because it just displayed the post.
+47
+
+SOCIAL MEDIA · PRINCIPLE
+Write a follow on both users' shards; retry the side that fails
+following
+Ana → Ben
+Ana's shard
+followers
+Ben ← Ana
+Ben's shard
+1  write first
+2  write second, retry on failure
+Do: make both writes safe to repeat.
+Accept: a moment where the lists disagree.
+Don't: use this for money or seats.
+An action that touches two owners is two writes. Order them, make them repeatable, and retry.
+48
+A follow connects two owners, so no single shard can hold it for both pages. Ana's “following” list must be on Ana's shard; Ben's “followers” list must be on Ben's. So one click writes two rows on two databases. There is no shared transaction. Use the detail-first idea from the master-detail lecture: write the initiator's row first, then the other side, and make both writes safe to repeat so a failed second write can simply be retried. For a moment the two lists may disagree; that is acceptable for follows. It would not be acceptable for money or seats.
+48
+
+SOCIAL MEDIA · PRINCIPLE
+Don't update one like counter on every like
+One counter row
+Every like runs
+UPDATE posts SET like_count = like_count + 1
+
+10,000 likes → 10,000 waits for the same row lock.
+One row per like
+Every like runs
+INSERT INTO likes …
+
+Different rows, no shared lock. Count when shown, or refresh a stored count every few seconds.
+Sharding spreads many authors; it cannot split one celebrity. Remove the single row everyone locks.
+49
+The celebrity problem. A popular post gets thousands of likes a minute, and all of them go to the author's shard: hashing cannot split one post. It gets worse if every like also runs UPDATE posts SET like_count = like_count + 1, because every like then waits for the lock on that single row. Insert one row per like instead; inserts of different rows don't wait on each other. Count when the post is shown, or refresh a stored count every few seconds. The shard is still busy, but it is no longer stuck in one queue.
+49
+
+SOCIAL MEDIA · PRINCIPLE
+Decide early how the home feed gathers posts from every shard
+Copy at write time
+When Ben posts, add the post id to each follower's feed on the follower's shard.
+
+Reading: one shard.
+Writing: one row per follower.
+Collect at read time
+When Ana opens her feed, ask every shard for recent posts by people she follows, then merge.
+
+Writing: one row.
+Reading: every shard.
+Pick one and say why. Large systems mix them: copy for most users, collect for celebrities.
+50
+The home feed shows recent posts from everyone you follow, and those authors live on every shard. There are two standard answers. Copy at write time: when Ben posts, add the post id to each follower's feed table on the follower's shard; reading is then one shard, but a post by someone with a million followers means a million writes. Collect at read time: ask every shard for recent posts by the people you follow and merge; writing is cheap, reading is heavy. Large systems mix them: copy for ordinary users, collect for celebrities. This is a preview of the next lecture; for now, teams should pick one and say why.
+50
+
+EVENT MANAGEMENT · PRINCIPLE
+Shard by event so seats and registrations share one transaction
+events  Hack Night · seats_left 2
+registrations  Ben, Cy
+The event's shard
+Do: shard events and registrations by event_id.
+Why: check seat, take seat, record registration: one local transaction.
+Don't: shard registrations by attendee; the seat limit would span shards.
+Prefer event_id over organizer_id: one big organizer would make one shard hot.
+Shard by whatever owns the rule you must never break. Here, that rule is the seat limit.
+51
+The rule an event app must never break: don't sell more seats than exist. Checking seats, taking one, and recording the registration must succeed or fail together, so the event row and its registrations must live on the same database. That makes the event the owner and event_id the shard key. Sharding registrations by attendee would put the seat count on one shard and the registrations on many, and no single transaction could protect the limit. Prefer event_id over organizer_id: one large organizer would otherwise make one shard hot.
+51
+
+EVENT MANAGEMENT · PRINCIPLE
+Don't expect sharding to rescue one sold-out event
+Many events at once
+Registrations for 50 different events spread across shards.
+
+Sharding helps.
+One popular event
+Every registration has the same event_id and locks the same seat row.
+
+Sharding can't split it: use a waiting room or queue, and limit attempts per user.
+Hashing spreads many keys, never one. A burst on one key needs a queue, not another shard.
+52
+Be honest with teams. Sharding helps when many events take registrations at the same time: they spread over shards. When tickets open for one popular event, every registration has the same event_id, so they all go to one shard and all lock the same event row. Hashing cannot split one key. The fixes are outside the database: a waiting room or queue that admits people at a steady rate, and a limit on attempts per user. Event search, meanwhile, belongs in the search index from the inverted-index lecture, not in queries across shards.
+52
+
+EVENT MANAGEMENT · PRINCIPLE
+Copy each ticket to the attendee's shard for “My tickets”
+registrations
+Ben · Hack Night
+Event's shard
+my_tickets
+Hack Night, Nov 14
+Ben's shard
+1  the real record
+2  the copy, retried on failure
+Do: write the registration first, the copy second.
+Why: “My tickets” becomes a one-shard read.
+If the copy fails, the seat is still right; retry.
+Same pattern as follows: the owner's shard holds the truth; the reader's shard holds a small copy.
+53
+Ben's registrations live on the shards of the events he registered for, scattered everywhere. His “My tickets” page would have to ask every shard. Instead, after a registration succeeds, write a small copy (event id, title, start time) to a my_tickets table on Ben's own shard. The registration on the event's shard is the real record and is written first; the copy is written second and is safe to retry. If the copy fails, the seat is still correctly taken, and a retry fixes the page.
+53
+
+APPENDIX · METHOD
+Reuse the ten steps; change only these five
+Step
+E-commerce
+Social media
+Event management
+2  Placement
+carts, orders by user_id
+posts, likes, comments by author
+events, registrations by event_id
+4  Schema
+order_items gets user_id
+likes; following and followers
+registrations; my_tickets
+5  Shard check
+users
+users
+users and events
+9  Writes
+checkout()
+like rows; follow = 2 writes
+register()
+10 Reads
+my orders
+post with its likes
+my tickets
+Event apps route two things: users by user id, events by event id. Both use the same bucket function.
+54
+Steps 1, 3, 6, 7 and 8 are identical for every team. The rows here are the only places a social or event team's work differs from the e-commerce walk-through.
+54
+
+APPENDIX · METHOD · EVENTS
+Register with one stored procedure on the event's shard
+create or replace function register(
+    p_event uuid, p_attendee uuid)
+returns uuid language plpgsql as $$
+declare v_id uuid;
+begin
+  update events set seats_left = seats_left - 1
+  where id = p_event and seats_left > 0;
+  if not found then raise exception 'event is full'; end if;
+ 
+  insert into registrations (event_id, attendee_id)
+  values (p_event, p_attendee) returning id into v_id;
+  return v_id;
+end $$;
+The app's call, on the event's shard:
+select register(
+ '730e1cd0-bd32-4a85-a77d-10aebb189a14',
+ '612b10ed-2d33-48c6-9e77-4c984a469f2b');
+Takes a seat only if one is left
+Locks the event row: no overselling
+Duplicate registration: seat given back
+Shard check on events: same pattern as users, check (shard_bucket(id) between 0 and 31) on shard_0.
+55
+Install this on every shard along with the events and registrations tables (full file in the handout). The UPDATE takes a seat only if one is left; it also locks the event row, so two people can't take the last seat. If the attendee is already registered, the unique rule on (event_id, attendee_id) fails, and because a function is one transaction, the seat is given back automatically. We tested: a duplicate registration left seats_left unchanged, and a full event raised 'event is full'.
+55
+
+APPENDIX · METHOD · EVENTS
+Write the ticket copy second, on the attendee's shard
+After register() succeeds · on the attendee's shard
+insert into my_tickets (attendee_id, event_id, title, starts_at)
+values ('612b10ed-2d33-48c6-9e77-4c984a469f2b',
+        '730e1cd0-bd32-4a85-a77d-10aebb189a14',
+        'Cajun Hack Night', '2026-11-14 18:00-06')
+on conflict do nothing;                 -- safe to retry
+My tickets · on the attendee's shard
+select title, starts_at from my_tickets
+where attendee_id = '612b10ed-2d33-48c6-9e77-4c984a469f2b'
+order by starts_at;
+Registration first (the truth), copy second (retry until it lands).
+56
+After register() returns, write the copy on the attendee's shard (found from the session, as in the e-commerce login). ON CONFLICT DO NOTHING makes it safe to retry. The My tickets page is then one query on one shard, sorted by start time.
+56
+
+APPENDIX · METHOD · SOCIAL
+Write likes as rows on the author's shard; count them when shown
+Like a post · on the author's shard
+insert into likes (post_id, liker_id)
+values ('85b43973-60cc-4262-8ab8-ec359db2b337',
+        '002ec66b-1fd5-497a-9061-6efc7068f46c')
+on conflict do nothing;                 -- liking twice does nothing
+Show the post with its count · same shard
+select p.body,
+       (select count(*) from likes l where l.post_id = p.id) as likes
+from posts p
+where p.id = '85b43973-60cc-4262-8ab8-ec359db2b337';
+No UPDATE of a counter on every like: inserts of different rows don't wait for each other.
+57
+Likes go to the shard of the post's author (Ben), which the app knows from the post it displayed. The primary key (post_id, liker_id) means liking twice does nothing, so a double click is harmless. Counting uses that same primary key index, so it stays fast for ordinary posts; for a celebrity post, store a count and refresh it every few seconds instead of on every like.
+57
+
+APPENDIX · METHOD · SOCIAL
+Follow with two writes: follower's shard first, then followee's
+1 · on Ana's shard (shard_0)
+insert into following (follower_id, followee_id)
+values ('002ec66b-1fd5-497a-9061-6efc7068f46c',
+        '612b10ed-2d33-48c6-9e77-4c984a469f2b')
+on conflict do nothing;
+2 · on Ben's shard (shard_1), retried until it succeeds
+insert into followers (followee_id, follower_id)
+values ('612b10ed-2d33-48c6-9e77-4c984a469f2b',
+        '002ec66b-1fd5-497a-9061-6efc7068f46c')
+on conflict do nothing;
+Two shards, two statements, no shared transaction: order them and make both safe to repeat.
+58
+Ana (shard_0) follows Ben (shard_1). Statement 1 runs on Ana's shard and statement 2 on Ben's. Both use ON CONFLICT DO NOTHING, so if statement 2 fails the app simply runs it again, and running statement 1 twice is harmless too. Unfollow is the same in reverse with DELETE. Ana's 'following' page reads her own shard; Ben's 'followers' page reads his.
+58

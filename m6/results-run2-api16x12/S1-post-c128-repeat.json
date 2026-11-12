@@ -1,0 +1,91 @@
+{
+ "label": "S1-post-c128-repeat",
+ "shards": 1,
+ "workload": "post",
+ "concurrency": 128,
+ "started_utc": "2026-11-10T23:09:44.023619+00:00",
+ "duration_s": 30.677,
+ "attempts": 13511,
+ "successes": 13511,
+ "errors": 0,
+ "error_rate": 0.0,
+ "rps_success": 440.433,
+ "mean_ms": 286.06,
+ "p50_ms": 98.93,
+ "p95_ms": 761.3,
+ "p99_ms": 831.26,
+ "max_ms": 1240.09,
+ "by_kind": {
+  "post:ok": 13511
+ },
+ "ok_by_user_shard": {
+  "shard_0": 13511
+ },
+ "error_codes": {},
+ "api_cpu_mean_pct": 76.9,
+ "api_cpu_max_pct": 96.2,
+ "api_rss_max_mib": 1108.5,
+ "db_active_backends_mean": {
+  "shard_0": 7.07
+ },
+ "db_top_waits": {
+  "shard_0": {
+   "CPU:running": 4.21,
+   "LWLock:WALWrite": 1.0,
+   "IO:WalSync": 0.72,
+   "LWLock:BufferContent": 0.72,
+   "Client:ClientRead": 0.24,
+   "LWLock:WALInsert": 0.07,
+   "Timeout:SpinDelay": 0.07,
+   "LWLock:BufferMapping": 0.03
+  }
+ },
+ "db": {
+  "shard_0": {
+   "xact_commit": 14645,
+   "xact_rollback": 0,
+   "tup_inserted": 611212,
+   "tup_updated": 0,
+   "tup_deleted": 0,
+   "blks_read": 0,
+   "blks_hit": 9087398,
+   "wal_records": 1999411,
+   "wal_bytes": 251625439.0,
+   "wal_buffers_full": 0,
+   "db_exec_s_per_s": 3.836,
+   "commits_per_s": 477.4,
+   "rows_inserted_per_s": 19924.3,
+   "wal_mb_per_s": 8.203,
+   "db_size_mb": 216.1,
+   "top_statements": [
+    {
+     "query": "select post_created_at, remote_followers from m6.publish_post($1, $2, $3, $4)",
+     "calls": 13511,
+     "total_exec_ms": 117600.7,
+     "mean_exec_ms": 8.704,
+     "rows": 13511,
+     "wal_bytes": 248140741.0
+    },
+    {
+     "query": "select u.id, u.display_name from m6.sessions s join m6.users u on u.id = s.user_id where s",
+     "calls": 828,
+     "total_exec_ms": 60.0,
+     "mean_exec_ms": 0.072,
+     "rows": 828,
+     "wal_bytes": 0.0
+    }
+   ]
+  }
+ },
+ "db_host": {
+  "shard_0": {
+   "cpu_busy_pct": 46.0,
+   "cpu_iowait_pct": 11.4,
+   "ncpu": 2,
+   "disk_write_mb_s": 28.8,
+   "disk_writes_per_s": 1280.8,
+   "disk_busy_pct": 112.0,
+   "load1_end": 3.76
+  }
+ }
+}
