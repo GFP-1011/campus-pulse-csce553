@@ -1,0 +1,87 @@
+{
+ "label": "S1-like-c128",
+ "shards": 1,
+ "workload": "like",
+ "concurrency": 128,
+ "started_utc": "2026-11-10T23:10:51.756245+00:00",
+ "duration_s": 30.456,
+ "attempts": 16517,
+ "successes": 16517,
+ "errors": 0,
+ "error_rate": 0.0,
+ "rps_success": 542.328,
+ "mean_ms": 232.71,
+ "p50_ms": 81.46,
+ "p95_ms": 628.29,
+ "p99_ms": 739.82,
+ "max_ms": 1049.7,
+ "by_kind": {
+  "like:ok": 16517
+ },
+ "ok_by_user_shard": {
+  "shard_0": 16517
+ },
+ "error_codes": {},
+ "api_cpu_mean_pct": 87.4,
+ "api_cpu_max_pct": 105.7,
+ "api_rss_max_mib": 1109.2,
+ "db_active_backends_mean": {
+  "shard_0": 1.43
+ },
+ "db_top_waits": {
+  "shard_0": {
+   "IO:WalSync": 0.79,
+   "LWLock:WALWrite": 0.43,
+   "CPU:running": 0.14,
+   "Client:ClientRead": 0.07
+  }
+ },
+ "db": {
+  "shard_0": {
+   "xact_commit": 17436,
+   "xact_rollback": 0,
+   "tup_inserted": 15207,
+   "tup_updated": 0,
+   "tup_deleted": 0,
+   "blks_read": 0,
+   "blks_hit": 204552,
+   "wal_records": 71521,
+   "wal_bytes": 5648929.0,
+   "wal_buffers_full": 0,
+   "db_exec_s_per_s": 0.048,
+   "commits_per_s": 572.5,
+   "rows_inserted_per_s": 499.3,
+   "wal_mb_per_s": 0.185,
+   "db_size_mb": 75.6,
+   "top_statements": [
+    {
+     "query": "insert into m6.likes (author_id, post_id, liker_id) values ($1,$2,$3) on conflict do nothi",
+     "calls": 16517,
+     "total_exec_ms": 1449.1,
+     "mean_exec_ms": 0.088,
+     "rows": 14374,
+     "wal_bytes": 5004818.0
+    },
+    {
+     "query": "select u.id, u.display_name from m6.sessions s join m6.users u on u.id = s.user_id where s",
+     "calls": 921,
+     "total_exec_ms": 20.7,
+     "mean_exec_ms": 0.022,
+     "rows": 921,
+     "wal_bytes": 0.0
+    }
+   ]
+  }
+ },
+ "db_host": {
+  "shard_0": {
+   "cpu_busy_pct": null,
+   "cpu_iowait_pct": null,
+   "ncpu": 2,
+   "disk_write_mb_s": 0.0,
+   "disk_writes_per_s": 0.0,
+   "disk_busy_pct": 0.0,
+   "load1_end": 3.46
+  }
+ }
+}

@@ -1,0 +1,75 @@
+\section{Implementation: the ten steps on Supabase}\label{sec:steps}
+
+We followed ``How to shard in Azure + Supabase'' step by step and adapted the handout
+\texttt{sharding\_setup.sql} (Part A and the social-media appendix). Our app runs on Render, not Azure
+App Service, and for the load tests it ran on a lab server, so ``Azure app settings'' became environment variables
+(Step~7). All objects live in a dedicated schema \texttt{m6} so the M1/M2 tables in \texttt{public} keep serving
+the hosted M1 application.
+
+\begin{center}\small
+\begin{tabularx}{\linewidth}{@{}r>{\raggedright}p{4.1cm}>{\raggedright\arraybackslash}X@{}}
+\toprule
+Step & Lecture instruction & What we did (file) \\
+\midrule
+1 & Confirm writes are the bottleneck & \texttt{pg\_stat\_statements} (already enabled in schema \texttt{extensions}),
+  reset before each series; the handout query plus a top-statement query (\texttt{m6/sql/step1\_measure.sql});
+  results in Section~\ref{sec:bottleneck}. \\
+2 & Write down where every table goes & Worksheet Step~5 (Section~\ref{sec:worksheet}); 64 buckets. \\
+3 & One Supabase project per shard, same region & \texttt{campus-pulse-csce553} (shard\_0) and
+  \texttt{campus-pulse-shard-1} (shard\_1), both \textbf{West US (Oregon), us-west-2}, Nano compute, free plan. \\
+4 & Same schema file on every shard & \texttt{m6/sql/shard\_schema.sql} (bucket function, 8 tables, \texttt{publish\_post()}, \texttt{fanout()}). \\
+5 & Check that rejects other shards' users & \texttt{m6/sql/shard\_check.sql}: \texttt{users\_belong\_here} with 0--31 / 32--63
+  (0--63 in the one-database baseline). \\
+6 & Directory and bucket map on shard\_0 & \texttt{m6/sql/directory.sql}: \texttt{user\_directory}, \texttt{bucket\_map} (32/32). \\
+7 & Connection strings in settings, not code & \texttt{SHARD\_0\_URL}, \texttt{SHARD\_1\_URL} in \texttt{.env} (git-ignored);
+  the app maps the \texttt{bucket\_map} name \texttt{shard\_1} to \texttt{SHARD\_1\_URL}. Session-pooler strings (IPv4);
+  the app uses the same pooler's transaction port 6543. \\
+8 & Load shared products on every shard & Not applicable: Campus Pulse has no shared catalogue. The only
+  thing that must be identical everywhere is \texttt{shard\_bucket()}, which we verify (Python = SQL for 2{,}000 ids on every shard). \\
+9 & Writes: route by owner & register (directory row, then user row on its shard, retried with the same id);
+  publish (\texttt{publish\_post()} on the author's shard, then \texttt{fanout()} copies on other shards);
+  like (row on the post author's shard); follow (two idempotent writes). \texttt{app\_sharded/main.py} \\
+10 & Reads: find the shard, then plain SQL & login looks up \texttt{user\_directory}$\bowtie$\texttt{bucket\_map} once; the session token is
+  \texttt{shard\_n.<random>}, so every per-user page (home feed, following, my posts) is a one-shard query. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection*{Adapted SQL (excerpts)}
+The bucket rule and the shard check are unchanged from the handout except for the schema name:
+\begin{lstlisting}[language=SQL]
+create or replace function m6.shard_bucket(u uuid) returns int language sql immutable as $$
+  select (('x' || substr(md5(u::text), 1, 8))::bit(32)::bigint % 64)::int $$;
+alter table m6.users add constraint users_belong_here
+  check (m6.shard_bucket(id) between 0 and 31);          -- 32..63 on shard_1
+\end{lstlisting}
+Publishing is the social-media equivalent of the handout's \texttt{checkout()}: one stored procedure, one local
+transaction on the owner's shard. It returns the followers that live on other shards so the app can write their
+copies second:
+\begin{lstlisting}[language=SQL]
+create or replace function m6.publish_post(p_post uuid, p_author uuid, p_body text, p_tags text[],
+    out post_created_at timestamptz, out remote_followers uuid[]) language plpgsql as $$
+begin
+  post_created_at := clock_timestamp();
+  insert into m6.posts (id, author_id, body, created_at, updated_at)
+  values (p_post, p_author, p_body, post_created_at, post_created_at);
+  insert into m6.post_tags (author_id, post_id, tag)
+  select p_author, p_post, t from unnest(p_tags) t on conflict do nothing;
+  insert into m6.feed_items (owner_id, created_at, post_id, author_id, preview)      -- local copies
+  select x.owner, post_created_at, p_post, p_author, left(p_body, 80)
+  from (select p_author as owner union
+        select f.follower_id from m6.followers f where f.followee_id = p_author) x
+  where exists (select 1 from m6.users u where u.id = x.owner);
+  select coalesce(array_agg(f.follower_id), '{}') into remote_followers        -- for fanout()
+  from m6.followers f where f.followee_id = p_author
+   and not exists (select 1 from m6.users u where u.id = f.follower_id);
+end $$;
+\end{lstlisting}
+Registration follows Step~9 exactly (A on the directory, B on the returned shard), and a like is the appendix
+statement with the routing column added:
+\begin{lstlisting}[language=SQL]
+insert into m6.user_directory (email) values (lower(:email)) returning user_id;   -- A, shard_0
+insert into m6.users (id, email, display_name, password_hash) values (...)        -- B, user's shard
+  on conflict (id) do nothing;                                                    -- retry-safe
+insert into m6.likes (author_id, post_id, liker_id) values (...) on conflict do nothing;
+\end{lstlisting}

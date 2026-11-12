@@ -1,0 +1,48 @@
+\documentclass[10pt]{article}
+\usepackage[margin=0.9in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amssymb,pifont}
+\usepackage{booktabs,tabularx,array,longtable,makecell,multirow}
+\usepackage{graphicx,float,caption}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{tikz}
+\usetikzlibrary{positioning,fit,arrows.meta}
+\usepackage[hidelinks]{hyperref}
+
+\newcommand{\teamnames}{Fupei Guo, Yanyu Zhou, Junru Zhou}
+\makeatletter\newcommand{\tabinput}[1]{\@@input #1 }\makeatother
+
+\lstset{basicstyle=\ttfamily\scriptsize, columns=fullflexible, keepspaces=true, breaklines=true,
+  frame=single, rulecolor=\color{black!25}, backgroundcolor=\color{black!3},
+  keywordstyle=\color{RoyalBlue}\bfseries, commentstyle=\color{black!55}, upquote=true,
+  morekeywords={returns,language,plpgsql,immutable,out,perform,coalesce,unnest,array_agg,conflict,nothing}}
+\captionsetup{font=small, labelfont=bf}
+\pagestyle{fancy}\fancyhf{}
+\lhead{\small CSCE 553 · M6 · Scaling writes by sharding}\rhead{\small Campus Pulse}\cfoot{\small\thepage}
+\setlength{\parskip}{3pt}\setlength{\parindent}{0pt}
+
+\title{\textbf{M6 --- Scaling Writes by Splitting the Data}\\[2pt]
+  \large Campus Pulse on two hash-partitioned Supabase databases}
+\author{Team: \teamnames \\ CSCE 553 \quad\textbullet\quad
+  \href{https://github.com/GFP-1011/campus-pulse-csce553/tree/m6}{github.com/GFP-1011/campus-pulse-csce553} (branch \texttt{m6})}
+\date{Measurements: 10 November 2026 (UTC)}
+
+\begin{document}
+\maketitle
+\thispagestyle{fancy}
+
+\input{sections/summary}
+\input{sections/worksheet}
+\input{sections/models}
+\input{sections/steps}
+\input{sections/method}
+\input{sections/results}
+\input{sections/discussion}
+\input{sections/reproduce}
+
+\end{document}

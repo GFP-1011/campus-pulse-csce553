@@ -7,3 +7,9 @@ __pycache__/
 htmlcov/
 .coverage
 CSCE553-001-202720_ M1 - Baseline System _ Home.pdf
+m6/.private/
+m6/report/*.aux
+m6/report/*.log
+m6/report/*.fls
+m6/report/*.fdb_latexmk
+m6/report/*.out

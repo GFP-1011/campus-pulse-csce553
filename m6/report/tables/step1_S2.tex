@@ -1,0 +1,12 @@
+shard\_0 & \texttt{select post\_created\_at, remote\_followers from m6.publish\_post(} & 32,548 & 115,029 & 3.53 & 318.6 \\
+shard\_0 & \texttt{select m6.fanout(\$1, \$2, \$3, \$4, \$5)} & 34,327 & 63,653 & 1.85 & 279.6 \\
+shard\_0 & \texttt{truncate m6.feed\_items, m6.likes, m6.post\_tags, m6.posts} & 8 & 2,523 & 315.37 & 0.1 \\
+shard\_0 & \texttt{SELECT * FROM pgbouncer.get\_auth(\$1)} & 58 & 665 & 11.46 & 0.0 \\
+shard\_0 & \texttt{select coalesce(wait\_event\_type,\$1), coalesce(wait\_event,\$2), } & 250 & 445 & 1.78 & 0.0 \\
+shard\_0 & \texttt{DISCARD ALL} & 33 & 186 & 5.63 & 0.0 \\
+shard\_1 & \texttt{select post\_created\_at, remote\_followers from m6.publish\_post(} & 34,327 & 276,201 & 8.05 & 382.3 \\
+shard\_1 & \texttt{select m6.fanout(\$1, \$2, \$3, \$4, \$5)} & 32,548 & 148,033 & 4.55 & 318.1 \\
+shard\_1 & \texttt{truncate m6.feed\_items, m6.likes, m6.post\_tags, m6.posts} & 8 & 1,516 & 189.53 & 0.1 \\
+shard\_1 & \texttt{SELECT * FROM pgbouncer.get\_auth(\$1)} & 57 & 1,483 & 26.02 & 0.0 \\
+shard\_1 & \texttt{select coalesce(wait\_event\_type,\$1), coalesce(wait\_event,\$2), } & 250 & 1,260 & 5.04 & 0.0 \\
+shard\_1 & \texttt{select u.id, u.display\_name from m6.sessions s join m6.users u} & 2,385 & 800 & 0.34 & 0.0 \\

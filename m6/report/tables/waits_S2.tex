@@ -1,0 +1,22 @@
+post & 1 & shard\_0 & IO:WalSync 0.50, CPU:running 0.50 \\
+post & 1 & shard\_1 &  \\
+post & 4 & shard\_0 & CPU:running 0.33, IO:WalSync 0.33 \\
+post & 4 & shard\_1 & IO:WalSync 0.33, CPU:running 0.17 \\
+post & 8 & shard\_0 & IO:WalSync 0.67, CPU:running 0.33 \\
+post & 8 & shard\_1 & CPU:running 0.67 \\
+post & 16 & shard\_0 & CPU:running 1.31, IO:WalSync 0.25, Client:ClientRead 0.12, LWLock:WALWrite 0.06 \\
+post & 16 & shard\_1 & CPU:running 0.38, IO:WalSync 0.25 \\
+post & 32 & shard\_0 & CPU:running 0.89, IO:WalSync 0.44, LWLock:WALWrite 0.33 \\
+post & 32 & shard\_1 & IO:WalSync 0.39, CPU:running 0.17, LWLock:WALWrite 0.17, IO:WalWrite 0.06 \\
+post & 64 & shard\_0 & LWLock:WALWrite 1.20, CPU:running 0.88, IO:WalSync 0.60, Client:ClientRead 0.04, LWLock:BufferContent 0.04 \\
+post & 64 & shard\_1 & CPU:running 0.64, LWLock:WALWrite 0.60, IO:WalSync 0.44, Client:ClientRead 0.04, LWLock:BufferContent 0.04 \\
+post & 96 & shard\_0 & CPU:running 1.69, LWLock:WALWrite 1.14, IO:WalSync 0.69, Client:ClientRead 0.34, LWLock:BufferContent 0.10 \\
+post & 96 & shard\_1 & CPU:running 1.03, LWLock:WALWrite 0.86, IO:WalSync 0.62, Client:ClientRead 0.17, LWLock:BufferContent 0.14 \\
+post & 128 & shard\_0 & CPU:running 2.83, LWLock:WALWrite 1.24, IO:WalSync 0.55, LWLock:BufferContent 0.28, LWLock:WALInsert 0.24 \\
+post & 128 & shard\_1 & LWLock:WALWrite 3.55, CPU:running 1.52, IO:WalSync 0.52, Client:ClientRead 0.24, LWLock:BufferContent 0.07 \\
+post & 160 & shard\_0 & CPU:running 1.64, LWLock:WALWrite 1.14, IO:WalSync 0.54, Client:ClientRead 0.50, LWLock:BufferContent 0.11 \\
+post & 160 & shard\_1 & LWLock:WALWrite 3.43, CPU:running 2.43, IO:WalSync 0.57, Client:ClientRead 0.25, LWLock:BufferContent 0.25 \\
+post & 192 & shard\_0 & CPU:running 4.33, LWLock:WALWrite 1.90, LWLock:BufferContent 1.17, Client:ClientRead 0.93, IO:WalSync 0.47 \\
+post & 192 & shard\_1 & CPU:running 2.50, LWLock:WALWrite 2.50, IO:WalSync 0.70, Client:ClientRead 0.33, LWLock:BufferContent 0.10 \\
+post & 256 & shard\_0 & CPU:running 1.21, LWLock:WALWrite 0.82, IO:WalSync 0.45, Client:ClientRead 0.18, LWLock:BufferContent 0.12 \\
+post & 256 & shard\_1 & CPU:running 6.39, LWLock:WALWrite 2.36, LWLock:BufferContent 1.67, Lock:extend 0.64, Client:ClientRead 0.48 \\

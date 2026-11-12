@@ -1,0 +1,31 @@
+{
+ "layout": {
+  "shard_0": [
+   0,
+   31
+  ],
+  "shard_1": [
+   32,
+   63
+  ]
+ },
+ "per_shard": {
+  "shard_0": {
+   "users": 181,
+   "wrong_shard": 0
+  },
+  "shard_1": {
+   "users": 219,
+   "wrong_shard": 0
+  }
+ },
+ "directory": {
+  "shard_0": 181,
+  "shard_1": 219
+ },
+ "bucket_map": {
+  "shard_0": 32,
+  "shard_1": 32
+ },
+ "bad_insert": "rejected: new row for relation \"users\" violates check constraint \"users_belong_here\""
+}

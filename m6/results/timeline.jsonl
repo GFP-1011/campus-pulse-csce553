@@ -1,0 +1,76 @@
+{"utc": "2026-11-10T23:16:59.102238+00:00", "event": "series_start", "series": "S1", "commit": "7cd8ea8adee8782bec3ecf62581234587dfa5bb9"}
+{"utc": "2026-11-10T23:16:59.791663+00:00", "event": "m5_cron_paused", "jobs": [1]}
+{"utc": "2026-11-10T23:17:09.212968+00:00", "event": "api_started", "pid": 639301, "workers": 6, "pool_max_per_shard": 32, "children": 7}
+{"utc": "2026-11-10T23:17:12.214773+00:00", "event": "stage_start", "label": "S1-post-c1", "workload": "post", "concurrency": 1}
+{"utc": "2026-11-10T23:17:49.452273+00:00", "event": "stage_end", "label": "S1-post-c1", "rps": 12.39, "p99": 150.98, "err": 0.0}
+{"utc": "2026-11-10T23:18:05.103838+00:00", "event": "stage_start", "label": "S1-post-c4", "workload": "post", "concurrency": 4}
+{"utc": "2026-11-10T23:18:42.321866+00:00", "event": "stage_end", "label": "S1-post-c4", "rps": 49.784, "p99": 150.04, "err": 0.0}
+{"utc": "2026-11-10T23:18:57.951404+00:00", "event": "stage_start", "label": "S1-post-c8", "workload": "post", "concurrency": 8}
+{"utc": "2026-11-10T23:19:35.284270+00:00", "event": "stage_end", "label": "S1-post-c8", "rps": 99.475, "p99": 152.53, "err": 0.0}
+{"utc": "2026-11-10T23:19:50.901718+00:00", "event": "stage_start", "label": "S1-post-c16", "workload": "post", "concurrency": 16}
+{"utc": "2026-11-10T23:20:28.232533+00:00", "event": "stage_end", "label": "S1-post-c16", "rps": 200.198, "p99": 150.4, "err": 0.0}
+{"utc": "2026-11-10T23:20:44.006436+00:00", "event": "stage_start", "label": "S1-post-c32", "workload": "post", "concurrency": 32}
+{"utc": "2026-11-10T23:21:21.522584+00:00", "event": "stage_end", "label": "S1-post-c32", "rps": 365.248, "p99": 175.5, "err": 0.0}
+{"utc": "2026-11-10T23:21:37.292539+00:00", "event": "stage_start", "label": "S1-post-c64", "workload": "post", "concurrency": 64}
+{"utc": "2026-11-10T23:22:15.185034+00:00", "event": "stage_end", "label": "S1-post-c64", "rps": 573.543, "p99": 276.0, "err": 0.0}
+{"utc": "2026-11-10T23:22:32.163717+00:00", "event": "stage_start", "label": "S1-post-c128", "workload": "post", "concurrency": 128}
+{"utc": "2026-11-10T23:23:11.536103+00:00", "event": "stage_end", "label": "S1-post-c128", "rps": 522.341, "p99": 1197.81, "err": 0.0}
+{"utc": "2026-11-10T23:23:29.117689+00:00", "event": "stage_start", "label": "S1-post-c256", "workload": "post", "concurrency": 256}
+{"utc": "2026-11-10T23:24:10.438577+00:00", "event": "stage_end", "label": "S1-post-c256", "rps": 500.58, "p99": 2861.82, "err": 0.0}
+{"utc": "2026-11-10T23:24:29.168326+00:00", "event": "stage_start", "label": "S1-post-c128-repeat", "workload": "post", "concurrency": 128}
+{"utc": "2026-11-10T23:25:10.978591+00:00", "event": "stage_end", "label": "S1-post-c128-repeat", "rps": 475.814, "p99": 1224.92, "err": 0.0}
+{"utc": "2026-11-10T23:25:42.295880+00:00", "event": "stage_start", "label": "S1-like-c128", "workload": "like", "concurrency": 128}
+{"utc": "2026-11-10T23:26:19.793320+00:00", "event": "stage_end", "label": "S1-like-c128", "rps": 1329.588, "p99": 188.47, "err": 0.0}
+{"utc": "2026-11-10T23:26:29.794438+00:00", "event": "stage_start", "label": "S1-feed-c128", "workload": "feed", "concurrency": 128}
+{"utc": "2026-11-10T23:27:07.290798+00:00", "event": "stage_end", "label": "S1-feed-c128", "rps": 1571.355, "p99": 148.53, "err": 0.0}
+{"utc": "2026-11-10T23:27:17.291843+00:00", "event": "stage_start", "label": "S1-mix-c128", "workload": "mix", "concurrency": 128}
+{"utc": "2026-11-10T23:27:54.891837+00:00", "event": "stage_end", "label": "S1-mix-c128", "rps": 1552.923, "p99": 149.6, "err": 0.0}
+{"utc": "2026-11-10T23:28:06.799933+00:00", "event": "m5_cron_restored", "jobs": [1]}
+{"utc": "2026-11-10T23:28:06.800670+00:00", "event": "series_end", "series": "S1"}
+{"utc": "2026-11-10T23:28:06.961245+00:00", "event": "series_start", "series": "S2", "commit": "7cd8ea8adee8782bec3ecf62581234587dfa5bb9"}
+{"utc": "2026-11-10T23:28:07.548431+00:00", "event": "m5_cron_paused", "jobs": [1]}
+{"utc": "2026-11-10T23:28:20.108573+00:00", "event": "api_started", "pid": 650905, "workers": 6, "pool_max_per_shard": 32, "children": 7}
+{"utc": "2026-11-10T23:28:23.109573+00:00", "event": "stage_start", "label": "S2-post-c1", "workload": "post", "concurrency": 1}
+{"utc": "2026-11-10T23:29:02.604112+00:00", "event": "stage_end", "label": "S2-post-c1", "rps": 6.531, "p99": 225.51, "err": 0.0}
+{"utc": "2026-11-10T23:29:18.801577+00:00", "event": "stage_start", "label": "S2-post-c4", "workload": "post", "concurrency": 4}
+{"utc": "2026-11-10T23:29:58.153924+00:00", "event": "stage_end", "label": "S2-post-c4", "rps": 25.635, "p99": 228.96, "err": 0.0}
+{"utc": "2026-11-10T23:30:14.365982+00:00", "event": "stage_start", "label": "S2-post-c8", "workload": "post", "concurrency": 8}
+{"utc": "2026-11-10T23:30:53.735131+00:00", "event": "stage_end", "label": "S2-post-c8", "rps": 51.712, "p99": 227.48, "err": 0.0}
+{"utc": "2026-11-10T23:31:09.935672+00:00", "event": "stage_start", "label": "S2-post-c16", "workload": "post", "concurrency": 16}
+{"utc": "2026-11-10T23:31:49.732219+00:00", "event": "stage_end", "label": "S2-post-c16", "rps": 97.731, "p99": 285.17, "err": 0.0}
+{"utc": "2026-11-10T23:32:06.131745+00:00", "event": "stage_start", "label": "S2-post-c32", "workload": "post", "concurrency": 32}
+{"utc": "2026-11-10T23:32:45.657152+00:00", "event": "stage_end", "label": "S2-post-c32", "rps": 206.512, "p99": 227.64, "err": 0.0}
+{"utc": "2026-11-10T23:33:02.080355+00:00", "event": "stage_start", "label": "S2-post-c64", "workload": "post", "concurrency": 64}
+{"utc": "2026-11-10T23:33:41.596922+00:00", "event": "stage_end", "label": "S2-post-c64", "rps": 403.366, "p99": 231.43, "err": 0.0}
+{"utc": "2026-11-10T23:33:58.095130+00:00", "event": "stage_start", "label": "S2-post-c128", "workload": "post", "concurrency": 128}
+{"utc": "2026-11-10T23:34:38.053716+00:00", "event": "stage_end", "label": "S2-post-c128", "rps": 698.342, "p99": 313.09, "err": 0.0}
+{"utc": "2026-11-10T23:34:56.187508+00:00", "event": "stage_start", "label": "S2-post-c256", "workload": "post", "concurrency": 256}
+{"utc": "2026-11-10T23:35:40.179687+00:00", "event": "stage_end", "label": "S2-post-c256", "rps": 457.239, "p99": 3341.33, "err": 0.0}
+{"utc": "2026-11-10T23:35:59.813404+00:00", "event": "stage_start", "label": "S2-post-c128-repeat", "workload": "post", "concurrency": 128}
+{"utc": "2026-11-10T23:36:39.641865+00:00", "event": "stage_end", "label": "S2-post-c128-repeat", "rps": 702.896, "p99": 309.59, "err": 0.0}
+{"utc": "2026-11-10T23:37:13.311736+00:00", "event": "stage_start", "label": "S2-like-c128", "workload": "like", "concurrency": 128}
+{"utc": "2026-11-10T23:37:52.699390+00:00", "event": "stage_end", "label": "S2-like-c128", "rps": 1608.747, "p99": 147.88, "err": 0.0}
+{"utc": "2026-11-10T23:38:02.700388+00:00", "event": "stage_start", "label": "S2-feed-c128", "workload": "feed", "concurrency": 128}
+{"utc": "2026-11-10T23:38:42.106588+00:00", "event": "stage_end", "label": "S2-feed-c128", "rps": 1636.168, "p99": 148.11, "err": 0.0}
+{"utc": "2026-11-10T23:38:52.107503+00:00", "event": "stage_start", "label": "S2-mix-c128", "workload": "mix", "concurrency": 128}
+{"utc": "2026-11-10T23:39:31.676106+00:00", "event": "stage_end", "label": "S2-mix-c128", "rps": 1483.524, "p99": 159.67, "err": 0.0}
+{"utc": "2026-11-10T23:39:44.184181+00:00", "event": "m5_cron_restored", "jobs": [1]}
+{"utc": "2026-11-10T23:39:44.184851+00:00", "event": "series_end", "series": "S2"}
+{"utc": "2026-11-10T23:40:44.904788+00:00", "event": "extra_start", "series": "S2", "steps": "96,160,192", "repeat": "256"}
+{"utc": "2026-11-10T23:40:51.800847+00:00", "event": "stage_start", "label": "S2-post-c96", "workload": "post", "concurrency": 96}
+{"utc": "2026-11-10T23:41:31.878906+00:00", "event": "stage_end", "label": "S2-post-c96", "rps": 578.768, "p99": 273.74, "err": 0.0}
+{"utc": "2026-11-10T23:41:48.398195+00:00", "event": "stage_start", "label": "S2-post-c160", "workload": "post", "concurrency": 160}
+{"utc": "2026-11-10T23:42:28.451974+00:00", "event": "stage_end", "label": "S2-post-c160", "rps": 743.971, "p99": 397.91, "err": 0.0}
+{"utc": "2026-11-10T23:42:45.824488+00:00", "event": "stage_start", "label": "S2-post-c192", "workload": "post", "concurrency": 192}
+{"utc": "2026-11-10T23:43:30.731254+00:00", "event": "stage_end", "label": "S2-post-c192", "rps": 663.374, "p99": 1051.66, "err": 0.0}
+{"utc": "2026-11-10T23:43:47.206656+00:00", "event": "stage_start", "label": "S2-post-c256-repeat", "workload": "post", "concurrency": 256}
+{"utc": "2026-11-10T23:44:27.933721+00:00", "event": "stage_end", "label": "S2-post-c256-repeat", "rps": 717.867, "p99": 916.43, "err": 0.0}
+{"utc": "2026-11-10T23:44:46.275279+00:00", "event": "m5_cron_restored", "jobs": [1]}
+{"utc": "2026-11-10T23:44:46.276097+00:00", "event": "extra_end", "series": "S2"}
+{"utc": "2026-11-10T23:44:46.420021+00:00", "event": "extra_start", "series": "S1", "steps": "48,96", "repeat": ""}
+{"utc": "2026-11-10T23:44:58.807999+00:00", "event": "stage_start", "label": "S1-post-c48", "workload": "post", "concurrency": 48}
+{"utc": "2026-11-10T23:45:37.270863+00:00", "event": "stage_end", "label": "S1-post-c48", "rps": 495.576, "p99": 190.08, "err": 0.0}
+{"utc": "2026-11-10T23:45:52.932028+00:00", "event": "stage_start", "label": "S1-post-c96", "workload": "post", "concurrency": 96}
+{"utc": "2026-11-10T23:46:32.476243+00:00", "event": "stage_end", "label": "S1-post-c96", "rps": 366.207, "p99": 3827.84, "err": 0.0}
+{"utc": "2026-11-10T23:46:53.790111+00:00", "event": "m5_cron_restored", "jobs": [1]}
+{"utc": "2026-11-10T23:46:53.790925+00:00", "event": "extra_end", "series": "S1"}

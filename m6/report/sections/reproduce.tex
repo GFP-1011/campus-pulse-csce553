@@ -1,0 +1,21 @@
+\section{Reproduction}\label{sec:repro}
+\begin{lstlisting}[language=bash]
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements-dev.txt -r m2/requirements.txt
+# .env (git-ignored): SHARD_0_URL=postgresql://postgres.<ref0>:<pw>@aws-0-us-west-2.pooler.supabase.com:5432/postgres
+#                     SHARD_1_URL=postgresql://postgres.<ref1>:<pw>@aws-0-us-west-2.pooler.supabase.com:5432/postgres
+python m6/run_series.py --shards 1     # before: one database (rebuilds schema m6, seeds, runs all stages)
+python m6/run_series.py --shards 2     # after: two shards
+python m6/run_extra.py --shards 2 --steps 96,160,192 --repeat 256    # intermediate stages
+python m6/run_extra.py --shards 1 --steps 48,96 --reseed
+m6/serve.sh 2 2 8602 & python m6/smoke_test.py   # functional check of Steps 9-10 (2-shard layout)
+python m6/report/build.py              # figures + tables from m6/results/*.json
+cd m6/report && latexmk -pdf main.tex
+# manual steps: python m6/shardctl.py setup|seed|check --shards 2 ; m6/serve.sh 2 6 8600
+\end{lstlisting}
+Raw evidence in \texttt{m6/results/}: per-request CSVs (\texttt{*.requests.csv}), 1~Hz wait-event samples
+(\texttt{*.dbwait.csv}), API CPU (\texttt{*.apicpu.csv}), per-stage JSON with database deltas, \texttt{summary.csv},
+\texttt{timeline.jsonl} (UTC), the shard checks (\texttt{S1-check.json}, \texttt{S2-check.json}), the Step~1 statement
+statistics (\texttt{step1-S1.json}, \texttt{step1-S2.json}), the functional check (\texttt{smoke-S2.json}), the
+host-metrics log (\texttt{dbhost-timeline.jsonl}) and SHA-256 fingerprints of the code that produced them.
+Session tokens and connection strings stay in the git-ignored \texttt{m6/.private/} and \texttt{.env}.

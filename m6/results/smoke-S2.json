@@ -1,0 +1,86 @@
+{
+ "utc": "2026-11-10T23:56:22Z",
+ "base": "http://127.0.0.1:8602",
+ "results": [
+  {
+   "check": "register lands users on both shards (Step 9 A+B)",
+   "ok": true,
+   "detail": "4 registrations"
+  },
+  {
+   "check": "duplicate email (any case) rejected by directory",
+   "ok": true,
+   "detail": "HTTP 409"
+  },
+  {
+   "check": "login: directory lookup returns the user's shard (Step 10)",
+   "ok": true,
+   "detail": "HTTP 200, shard=shard_1"
+  },
+  {
+   "check": "login with wrong password rejected",
+   "ok": true,
+   "detail": "HTTP 401"
+  },
+  {
+   "check": "A (shard_0) follows B (shard_1): two writes",
+   "ok": true,
+   "detail": "HTTP 201"
+  },
+  {
+   "check": "repeating the follow is harmless (idempotent)",
+   "ok": true,
+   "detail": "HTTP 201"
+  },
+  {
+   "check": "following row on follower's shard, followers row on followee's shard",
+   "ok": true,
+   "detail": "1/1"
+  },
+  {
+   "check": "B publishes; copy for A written second on shard_0",
+   "ok": true,
+   "detail": "HTTP 201, remote_copies={'shard_0': 1}, tags=['m6', 'smoke']"
+  },
+  {
+   "check": "post + tags live only on the author's shard",
+   "ok": true,
+   "detail": "shard_1 post=1 tags=2, shard_0 post=0"
+  },
+  {
+   "check": "A's home feed (one-shard read on shard_0) shows B's post",
+   "ok": true,
+   "detail": "HTTP 200, 1 items"
+  },
+  {
+   "check": "A likes B's post twice: one like row on B's shard",
+   "ok": true,
+   "detail": "likes=1, liked_by_me=True"
+  },
+  {
+   "check": "no like row on the liker's shard",
+   "ok": true,
+   "detail": "shard_0 likes=0"
+  },
+  {
+   "check": "A cannot edit B's post",
+   "ok": true,
+   "detail": "HTTP 404"
+  },
+  {
+   "check": "B edits own post (UPDATE on B's shard)",
+   "ok": true,
+   "detail": "HTTP 200"
+  },
+  {
+   "check": "forged token rejected",
+   "ok": true,
+   "detail": "HTTP 401"
+  },
+  {
+   "check": "inserting a shard_1 user on shard_0 is rejected",
+   "ok": true,
+   "detail": "new row for relation \"users\" violates check constraint \"users_belong_here\""
+  }
+ ]
+}

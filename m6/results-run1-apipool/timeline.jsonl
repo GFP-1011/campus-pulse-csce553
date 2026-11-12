@@ -1,0 +1,41 @@
+{"utc": "2026-11-10T22:44:07.360274+00:00", "event": "series_start", "series": "S1", "commit": "7cd8ea8adee8782bec3ecf62581234587dfa5bb9"}
+{"utc": "2026-11-10T22:44:07.951165+00:00", "event": "m5_cron_paused", "jobs": [1]}
+{"utc": "2026-11-10T22:44:16.568074+00:00", "event": "api_started", "pid": 607431, "workers": 8, "children": 9}
+{"utc": "2026-11-10T22:44:19.570298+00:00", "event": "stage_start", "label": "S1-post-c1", "workload": "post", "concurrency": 1}
+{"utc": "2026-11-10T22:44:56.902169+00:00", "event": "stage_end", "label": "S1-post-c1", "rps": 12.397, "p99": 103.1, "err": 0.0}
+{"utc": "2026-11-10T22:45:12.643280+00:00", "event": "stage_start", "label": "S1-post-c4", "workload": "post", "concurrency": 4}
+{"utc": "2026-11-10T22:45:49.920561+00:00", "event": "stage_end", "label": "S1-post-c4", "rps": 49.126, "p99": 153.69, "err": 0.0}
+{"utc": "2026-11-10T22:46:05.542359+00:00", "event": "stage_start", "label": "S1-post-c8", "workload": "post", "concurrency": 8}
+{"utc": "2026-11-10T22:46:42.821796+00:00", "event": "stage_end", "label": "S1-post-c8", "rps": 98.296, "p99": 153.31, "err": 0.0}
+{"utc": "2026-11-10T22:46:58.443340+00:00", "event": "stage_start", "label": "S1-post-c16", "workload": "post", "concurrency": 16}
+{"utc": "2026-11-10T22:47:36.134065+00:00", "event": "stage_end", "label": "S1-post-c16", "rps": 195.048, "p99": 154.35, "err": 0.0}
+{"utc": "2026-11-10T22:47:51.816329+00:00", "event": "stage_start", "label": "S1-post-c32", "workload": "post", "concurrency": 32}
+{"utc": "2026-11-10T22:48:29.385153+00:00", "event": "stage_end", "label": "S1-post-c32", "rps": 297.012, "p99": 241.41, "err": 0.0}
+{"utc": "2026-11-10T22:48:45.144870+00:00", "event": "stage_start", "label": "S1-post-c64", "workload": "post", "concurrency": 64}
+{"utc": "2026-11-10T22:49:23.360738+00:00", "event": "stage_end", "label": "S1-post-c64", "rps": 300.357, "p99": 555.75, "err": 0.0}
+{"utc": "2026-11-10T22:49:39.132013+00:00", "event": "stage_start", "label": "S1-post-c128", "workload": "post", "concurrency": 128}
+{"utc": "2026-11-10T22:50:18.580075+00:00", "event": "stage_end", "label": "S1-post-c128", "rps": 308.949, "p99": 1607.52, "err": 0.0}
+{"utc": "2026-11-10T22:50:34.899765+00:00", "event": "stage_start", "label": "S1-post-c64-repeat", "workload": "post", "concurrency": 64}
+{"utc": "2026-11-10T22:51:13.057905+00:00", "event": "stage_end", "label": "S1-post-c64-repeat", "rps": 301.027, "p99": 550.76, "err": 0.0}
+{"utc": "2026-11-10T22:51:30.860431+00:00", "event": "m5_cron_restored", "jobs": [1]}
+{"utc": "2026-11-10T22:51:30.861883+00:00", "event": "series_end", "series": "S1"}
+{"utc": "2026-11-10T22:51:57.439087+00:00", "event": "series_start", "series": "S1", "commit": "7cd8ea8adee8782bec3ecf62581234587dfa5bb9"}
+{"utc": "2026-11-10T22:51:58.073129+00:00", "event": "m5_cron_paused", "jobs": [1]}
+{"utc": "2026-11-10T22:51:59.155614+00:00", "event": "api_started", "pid": 613522, "workers": 8, "children": 9}
+{"utc": "2026-11-10T22:52:02.773981+00:00", "event": "stage_start", "label": "S1-post-c128-long", "workload": "post", "concurrency": 128}
+{"utc": "2026-11-10T22:53:12.835404+00:00", "event": "stage_end", "label": "S1-post-c128-long", "rps": 267.688, "p99": 1921.09, "err": 0.0}
+{"utc": "2026-11-10T22:53:42.438407+00:00", "event": "stage_start", "label": "S1-like-c64", "workload": "like", "concurrency": 64}
+{"utc": "2026-11-10T22:53:50.072855+00:00", "event": "stage_end", "label": "S1-like-c64", "rps": 0.0, "p99": NaN, "err": 0.0}
+{"utc": "2026-11-10T22:54:33.906847+00:00", "event": "series_start", "series": "S1", "commit": "7cd8ea8adee8782bec3ecf62581234587dfa5bb9"}
+{"utc": "2026-11-10T22:54:34.553298+00:00", "event": "m5_cron_paused", "jobs": [1]}
+{"utc": "2026-11-10T22:54:36.623231+00:00", "event": "api_started", "pid": 615945, "workers": 8, "children": 9}
+{"utc": "2026-11-10T22:54:40.320536+00:00", "event": "stage_start", "label": "S1-post-c128-long", "workload": "post", "concurrency": 128}
+{"utc": "2026-11-10T22:55:49.919173+00:00", "event": "stage_end", "label": "S1-post-c128-long", "rps": 292.295, "p99": 1745.79, "err": 0.0}
+{"utc": "2026-11-10T22:56:26.988398+00:00", "event": "stage_start", "label": "S1-like-c64", "workload": "like", "concurrency": 64}
+{"utc": "2026-11-10T22:57:05.080988+00:00", "event": "stage_end", "label": "S1-like-c64", "rps": 318.799, "p99": 524.59, "err": 0.0}
+{"utc": "2026-11-10T22:57:15.083468+00:00", "event": "stage_start", "label": "S1-feed-c64", "workload": "feed", "concurrency": 64}
+{"utc": "2026-11-10T22:57:52.936184+00:00", "event": "stage_end", "label": "S1-feed-c64", "rps": 381.79, "p99": 485.4, "err": 0.0}
+{"utc": "2026-11-10T22:58:02.938103+00:00", "event": "stage_start", "label": "S1-mix-c64", "workload": "mix", "concurrency": 64}
+{"utc": "2026-11-10T22:58:40.881916+00:00", "event": "stage_end", "label": "S1-mix-c64", "rps": 325.5, "p99": 540.29, "err": 0.0}
+{"utc": "2026-11-10T22:58:42.687235+00:00", "event": "m5_cron_restored", "jobs": [1]}
+{"utc": "2026-11-10T22:58:42.688477+00:00", "event": "series_end", "series": "S1"}

@@ -1,0 +1,20 @@
+{
+ "layout": {
+  "shard_0": [
+   0,
+   63
+  ]
+ },
+ "per_shard": {
+  "shard_0": {
+   "users": 400,
+   "wrong_shard": 0
+  }
+ },
+ "directory": {
+  "shard_0": 400
+ },
+ "bucket_map": {
+  "shard_0": 64
+ }
+}

@@ -1,0 +1,13 @@
+t_unix,shard,wait_type,wait_event,active
+1794353821.633957,shard_0,CPU,running,10
+1794353821.633957,shard_1,CPU,running,1
+1794353821.633957,shard_1,IO,WalSync,1
+1794353823.6341202,shard_0,CPU,running,1
+1794353823.6341202,shard_1,IO,WalSync,1
+1794353825.6342947,shard_0,CPU,running,1
+1794353826.6343803,shard_1,CPU,running,1
+1794353829.6346316,shard_1,CPU,running,1
+1794353830.6347158,shard_1,CPU,running,1
+1794353831.634797,shard_0,CPU,running,2
+1794353831.634797,shard_0,IO,WalSync,1
+1794353831.634797,shard_1,IO,WalSync,1

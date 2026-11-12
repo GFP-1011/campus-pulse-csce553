@@ -1,0 +1,93 @@
+{
+ "label": "S1-post-c96",
+ "shards": 1,
+ "workload": "post",
+ "concurrency": 96,
+ "started_utc": "2026-11-10T23:45:59.493250+00:00",
+ "duration_s": 30.931,
+ "attempts": 11327,
+ "successes": 11327,
+ "errors": 0,
+ "error_rate": 0.0,
+ "rps_success": 366.207,
+ "mean_ms": 258.76,
+ "p50_ms": 162.1,
+ "p95_ms": 303.68,
+ "p99_ms": 3827.84,
+ "max_ms": 10793.6,
+ "by_kind": {
+  "post:ok": 11327
+ },
+ "ok_by_user_shard": {
+  "shard_0": 11327
+ },
+ "error_codes": {},
+ "api_cpu_mean_pct": 36.6,
+ "api_cpu_max_pct": 72.2,
+ "api_rss_max_mib": 447.0,
+ "db_active_backends_mean": {
+  "shard_0": 15.63
+ },
+ "db_top_waits": {
+  "shard_0": {
+   "CPU:running": 10.26,
+   "LWLock:BufferContent": 2.15,
+   "LWLock:WALWrite": 1.74,
+   "LWLock:MultiXactGen": 0.52,
+   "IO:WalSync": 0.41,
+   "Client:ClientRead": 0.22,
+   "IO:DataFileExtend": 0.11,
+   "Lock:extend": 0.11,
+   "IO:WalWrite": 0.07,
+   "LWLock:BufferMapping": 0.04
+  }
+ },
+ "db": {
+  "shard_0": {
+   "xact_commit": 11786,
+   "xact_rollback": 0,
+   "tup_inserted": 515719,
+   "tup_updated": 0,
+   "tup_deleted": 0,
+   "blks_read": 0,
+   "blks_hit": 6507677,
+   "wal_records": 1727806,
+   "wal_bytes": 215252847.0,
+   "wal_buffers_full": 0,
+   "db_exec_s_per_s": 13.109,
+   "commits_per_s": 381.0,
+   "rows_inserted_per_s": 16673.4,
+   "wal_mb_per_s": 6.959,
+   "db_size_mb": 205.4,
+   "top_statements": [
+    {
+     "query": "select post_created_at, remote_followers from m6.publish_post($1, $2, $3, $4)",
+     "calls": 11327,
+     "total_exec_ms": 404641.4,
+     "mean_exec_ms": 35.724,
+     "rows": 11327,
+     "wal_bytes": 209112044.0
+    },
+    {
+     "query": "select u.id, u.display_name from m6.sessions s join m6.users u on u.id = s.user_id where s",
+     "calls": 106,
+     "total_exec_ms": 835.8,
+     "mean_exec_ms": 7.885,
+     "rows": 106,
+     "wal_bytes": 0.0
+    }
+   ]
+  }
+ },
+ "db_host": {
+  "shard_0": {
+   "cpu_busy_pct": null,
+   "cpu_iowait_pct": null,
+   "ncpu": 2,
+   "disk_write_mb_s": 0.0,
+   "disk_writes_per_s": 0.0,
+   "disk_busy_pct": 0.0,
+   "load1_end": 4.38
+  }
+ }
+}

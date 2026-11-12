@@ -1,0 +1,2 @@
+{"utc": "2026-11-10T23:10:32.412351+00:00", "event": "stage_start", "label": "S1-fill", "workload": "post", "concurrency": 32}
+{"utc": "2026-11-10T23:10:44.793442+00:00", "event": "stage_end", "label": "S1-fill", "rps": 363.083, "p99": 159.47, "err": 0.0}

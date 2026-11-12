@@ -1,0 +1,91 @@
+{
+ "label": "S1-post-c256",
+ "shards": 1,
+ "workload": "post",
+ "concurrency": 256,
+ "started_utc": "2026-11-10T23:08:48.139255+00:00",
+ "duration_s": 31.549,
+ "attempts": 13504,
+ "successes": 13504,
+ "errors": 0,
+ "error_rate": 0.0,
+ "rps_success": 428.027,
+ "mean_ms": 580.9,
+ "p50_ms": 117.94,
+ "p95_ms": 1793.29,
+ "p99_ms": 2417.75,
+ "max_ms": 2704.92,
+ "by_kind": {
+  "post:ok": 13504
+ },
+ "ok_by_user_shard": {
+  "shard_0": 13504
+ },
+ "error_codes": {},
+ "api_cpu_mean_pct": 73.5,
+ "api_cpu_max_pct": 97.9,
+ "api_rss_max_mib": 1107.8,
+ "db_active_backends_mean": {
+  "shard_0": 5.26
+ },
+ "db_top_waits": {
+  "shard_0": {
+   "CPU:running": 3.32,
+   "LWLock:WALWrite": 0.61,
+   "Client:ClientRead": 0.52,
+   "IO:WalSync": 0.45,
+   "LWLock:BufferContent": 0.19,
+   "LWLock:WALInsert": 0.06,
+   "IO:WalWrite": 0.06,
+   "Timeout:SpinDelay": 0.03
+  }
+ },
+ "db": {
+  "shard_0": {
+   "xact_commit": 15192,
+   "xact_rollback": 0,
+   "tup_inserted": 608003,
+   "tup_updated": 0,
+   "tup_deleted": 0,
+   "blks_read": 0,
+   "blks_hit": 11585057,
+   "wal_records": 1992330,
+   "wal_bytes": 253314289.0,
+   "wal_buffers_full": 0,
+   "db_exec_s_per_s": 4.304,
+   "commits_per_s": 481.5,
+   "rows_inserted_per_s": 19271.5,
+   "wal_mb_per_s": 8.029,
+   "db_size_mb": 214.1,
+   "top_statements": [
+    {
+     "query": "select post_created_at, remote_followers from m6.publish_post($1, $2, $3, $4)",
+     "calls": 13504,
+     "total_exec_ms": 135714.4,
+     "mean_exec_ms": 10.05,
+     "rows": 13504,
+     "wal_bytes": 252058975.0
+    },
+    {
+     "query": "select u.id, u.display_name from m6.sessions s join m6.users u on u.id = s.user_id where s",
+     "calls": 1537,
+     "total_exec_ms": 78.5,
+     "mean_exec_ms": 0.051,
+     "rows": 1537,
+     "wal_bytes": 0.0
+    }
+   ]
+  }
+ },
+ "db_host": {
+  "shard_0": {
+   "cpu_busy_pct": null,
+   "cpu_iowait_pct": null,
+   "ncpu": 2,
+   "disk_write_mb_s": 0.0,
+   "disk_writes_per_s": 0.0,
+   "disk_busy_pct": 0.0,
+   "load1_end": 4.7
+  }
+ }
+}

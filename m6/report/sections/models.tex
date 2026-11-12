@@ -1,0 +1,101 @@
+\section{Data models before and after}\label{sec:models}
+
+\subsection{Before (1): the M1/M2 baseline schema}
+The deployed M1 application (\texttt{app/models.py}, schema \texttt{public}) stores everything in one
+Supabase PostgreSQL database with auto-increment integer ids:
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+Table & Columns & Notes \\
+\midrule
+\texttt{users} & \texttt{id serial PK}, \texttt{email unique}, \texttt{display\_name}, \texttt{password\_hash}, \texttt{created\_at} & \\
+\texttt{sessions} & \texttt{id serial PK}, \texttt{user\_id FK}, \texttt{token\_hash unique}, \texttt{expires\_at} & \\
+\texttt{friendships} & \texttt{id serial PK}, \texttt{user\_id FK}, \texttt{friend\_id FK}, unique pair & one direction \\
+\texttt{posts} & \texttt{id serial PK}, \texttt{author\_id FK}, \texttt{body}, \texttt{created\_at}, \texttt{updated\_at} & \\
+\texttt{likes} & \texttt{id serial PK}, \texttt{user\_id FK}, \texttt{post\_id FK}, unique pair & \\
+\bottomrule
+\end{tabular}
+\end{center}
+Every write in this model is one or two small rows, and M2 showed that the hosted write path
+(\texttt{POST /api/messages}) saturated the single Render API process at about 15 requests/s long
+before the database was busy. To study write scaling we therefore had to \emph{extend the database so
+that writes create the bottleneck} (Section~\ref{sec:extension}).
+
+\subsection{Before (2): the extended single-database model used as the M6 baseline}\label{sec:extension}
+We extended the schema with three features a campus feed needs, each of which multiplies the work
+behind one click (lecture slide~7: lock, change the table, update every index, log and wait for disk):
+\begin{enumerate}[nosep,leftmargin=1.4em]
+\item \textbf{Home feed by copy at write time} (\texttt{feed\_items}): publishing a post inserts one
+      feed row for the author and one for each follower (40 in our graph), so a post writes 41 rows into a table
+      whose primary key is \texttt{(owner\_id, created\_at, post\_id)}.
+\item \textbf{Real-time full-text search}: \texttt{posts.search} is a generated \texttt{tsvector} with a GIN
+      (inverted) index, maintained on every insert/edit; this replaces M5's 5-minute materialized-view refresh.
+\item \textbf{Hashtags} (\texttt{post\_tags}) parsed from the body, and \textbf{follows} as two tables
+      (\texttt{following}/\texttt{followers}) instead of \texttt{friendships}.
+\end{enumerate}
+We also applied the sharding prerequisites (UUID ids, owner id in every child table, one stored
+procedure per busy write) \emph{already in the baseline}, so that the before/after comparison changes
+exactly one thing: the number of databases. In the baseline, \texttt{bucket\_map} sends all 64 buckets to
+shard\_0 and its check allows buckets 0--63.
+
+\begin{figure}[H]\centering
+\begin{tikzpicture}[font=\scriptsize, node distance=4mm,
+  tbl/.style={draw, rounded corners=1pt, fill=#1, align=left, inner sep=2.5pt, text width=3.25cm},
+  tbl/.default=white]
+\node[tbl=blue!6] (u) {\textbf{users}\\ id uuid PK \\ email, display\_name, password\_hash};
+\node[tbl=blue!6, below=of u] (s) {\textbf{sessions}\\ token\_hash PK \\ user\_id $\to$ users};
+\node[tbl=orange!10, right=6mm of u] (p) {\textbf{posts}\\ id uuid PK, author\_id $\to$ users \\ body, \textbf{search tsvector (GIN)} \\ unique(author\_id, id)};
+\node[tbl=orange!10, below=of p] (t) {\textbf{post\_tags}\\ (post\_id, tag) PK \\ (author\_id, post\_id) $\to$ posts};
+\node[tbl=orange!10, below=of t] (l) {\textbf{likes}\\ (post\_id, liker\_id) PK \\ (author\_id, post\_id) $\to$ posts};
+\node[tbl=green!8, right=6mm of p] (fi) {\textbf{feed\_items}\\ (owner\_id, created\_at, post\_id) PK \\ author\_id, preview \\ owner\_id $\to$ users};
+\node[tbl=green!8, below=of fi] (fw) {\textbf{following}\\ (follower\_id, followee\_id) PK};
+\node[tbl=green!8, below=of fw] (fr) {\textbf{followers}\\ (followee\_id, follower\_id) PK};
+\node[tbl=gray!12, below=of s] (d) {\textbf{user\_directory}\\ email PK, user\_id uuid unique \\[1pt] \textbf{bucket\_map}\\ bucket 0..63 PK, shard};
+\node[draw, dashed, fit=(u)(s)(p)(t)(l)(fi)(fw)(fr)(d), inner sep=3mm, label={[font=\small]above:One Supabase database (shard\_0): every row, all 64 buckets}] {};
+\end{tikzpicture}
+\caption{Before: the extended single-database model (schema \texttt{m6}). Blue = owner tables;
+orange = rows owned by the author; green = copies and follow edges; grey = directory.}
+\label{fig:before}
+\end{figure}
+
+\subsection{After: the same tables, hash-partitioned over two databases}
+\begin{figure}[H]\centering
+\begin{tikzpicture}[font=\scriptsize, >=stealth,
+  box/.style={draw, rounded corners=2pt, align=center, inner sep=3pt},
+  db/.style={draw, rounded corners=2pt, align=left, inner sep=3pt, text width=5.1cm, fill=#1},
+  db/.default=white]
+\node[box, fill=gray!8, text width=7.6cm] (app) {\textbf{Campus Pulse API} (FastAPI, \texttt{app\_sharded/})\\
+  bucket = md5(user\_id)[0:8] mod 64 $\to$ bucket\_map $\to$ \texttt{SHARD\_n\_URL}; one pool per shard};
+\node[db=blue!5, below left=9mm and -2.2cm of app] (s0) {\textbf{shard\_0} \ (Supabase project \#1, us-west-2)\\
+  users with bucket 0--31 \ \texttt{check users\_belong\_here}\\
+  their sessions, posts, post\_tags, likes,\\ following, followers, feed\_items\\[2pt]
+  \textbf{+ directory}: user\_directory, bucket\_map};
+\node[db=orange!8, below right=9mm and -2.2cm of app] (s1) {\textbf{shard\_1} \ (Supabase project \#2, us-west-2)\\
+  users with bucket 32--63 \ \texttt{check users\_belong\_here}\\
+  their sessions, posts, post\_tags, likes,\\ following, followers, feed\_items\\[2pt]
+  (same \texttt{shard\_schema.sql})};
+\draw[->] (app) -- node[left, font=\tiny, align=right]{login lookup;\\ owner writes} (s0);
+\draw[->] (app) -- node[right, font=\tiny, align=left]{owner writes} (s1);
+\draw[->, dashed, orange!70!black] (s0.east) -- node[above, font=\tiny]{feed copies, written second} (s1.west);
+\end{tikzpicture}
+\caption{After: two Supabase projects in the same region. Each database owns half of the users and
+every row those users own. A post commits on the author's shard; copies for followers on the other shard
+are written second (and retried) by \texttt{m6.fanout()}.}
+\label{fig:after}
+\end{figure}
+
+\noindent Differences between the before and after models, table by table:
+\begin{itemize}[nosep,leftmargin=1.2em]
+\item \textbf{Same shape, different rows:} all eight data tables exist on both shards; a row's home is
+      computed from its owner's id. Integer serial ids (M1) became UUIDs so no shared counter is needed.
+\item \textbf{New routing columns:} \texttt{likes.author\_id} and \texttt{post\_tags.author\_id} let child rows
+      follow the post's owner; composite foreign keys \texttt{(author\_id, post\_id)} $\to$ \texttt{posts(author\_id, id)}
+      guarantee a child can only attach to a post on the same shard.
+\item \textbf{Cross-owner relations became two rows:} M1's \texttt{friendships} became \texttt{following}
+      (follower's shard) + \texttt{followers} (followee's shard); \texttt{likes.liker\_id} has no foreign key because
+      the liker may live elsewhere.
+\item \textbf{New central-but-small tables} on shard\_0 only: \texttt{user\_directory} (email uniqueness and
+      login lookup) and \texttt{bucket\_map}. They are touched only at registration and login.
+\item \textbf{Fail loudly:} each shard's \texttt{users} table rejects ids from the other shard's buckets.
+\end{itemize}
