@@ -1,0 +1,138 @@
+{
+ "label": "S2-like-c128",
+ "shards": 2,
+ "workload": "like",
+ "concurrency": 128,
+ "started_utc": "2026-11-10T23:37:20.938329+00:00",
+ "duration_s": 30.079,
+ "attempts": 48390,
+ "successes": 48390,
+ "errors": 0,
+ "error_rate": 0.0,
+ "rps_success": 1608.747,
+ "mean_ms": 79.13,
+ "p50_ms": 75.49,
+ "p95_ms": 99.76,
+ "p99_ms": 147.88,
+ "max_ms": 184.77,
+ "by_kind": {
+  "like:ok": 48390
+ },
+ "ok_by_user_shard": {
+  "shard_1": 26838,
+  "shard_0": 21552
+ },
+ "error_codes": {},
+ "api_cpu_mean_pct": 129.6,
+ "api_cpu_max_pct": 146.8,
+ "api_rss_max_mib": 477.2,
+ "db_active_backends_mean": {
+  "shard_0": 0.86,
+  "shard_1": 1.52
+ },
+ "db_top_waits": {
+  "shard_0": {
+   "IO:WalSync": 0.48,
+   "LWLock:WALWrite": 0.24,
+   "Client:ClientRead": 0.1,
+   "IO:WalWrite": 0.05
+  },
+  "shard_1": {
+   "IO:WalSync": 0.71,
+   "LWLock:WALWrite": 0.67,
+   "CPU:running": 0.14
+  }
+ },
+ "db": {
+  "shard_0": {
+   "xact_commit": 21583,
+   "xact_rollback": 0,
+   "tup_inserted": 17075,
+   "tup_updated": 47,
+   "tup_deleted": 5,
+   "blks_read": 0,
+   "blks_hit": 226245,
+   "wal_records": 88629,
+   "wal_bytes": 6778402.0,
+   "wal_buffers_full": 0,
+   "db_exec_s_per_s": 0.052,
+   "commits_per_s": 717.5,
+   "rows_inserted_per_s": 567.7,
+   "wal_mb_per_s": 0.225,
+   "db_size_mb": 39.4,
+   "top_statements": [
+    {
+     "query": "insert into m6.likes (author_id, post_id, liker_id) values ($1,$2,$3) on conflict do nothi",
+     "calls": 21160,
+     "total_exec_ms": 1554.0,
+     "mean_exec_ms": 0.073,
+     "rows": 17023,
+     "wal_bytes": 5618509.0
+    },
+    {
+     "query": "select u.id, u.display_name from m6.sessions s join m6.users u on u.id = s.user_id where s",
+     "calls": 337,
+     "total_exec_ms": 6.7,
+     "mean_exec_ms": 0.02,
+     "rows": 337,
+     "wal_bytes": 0.0
+    }
+   ]
+  },
+  "shard_1": {
+   "xact_commit": 27400,
+   "xact_rollback": 0,
+   "tup_inserted": 21674,
+   "tup_updated": 0,
+   "tup_deleted": 0,
+   "blks_read": 0,
+   "blks_hit": 283736,
+   "wal_records": 108558,
+   "wal_bytes": 8157128.0,
+   "wal_buffers_full": 0,
+   "db_exec_s_per_s": 0.065,
+   "commits_per_s": 910.9,
+   "rows_inserted_per_s": 720.6,
+   "wal_mb_per_s": 0.271,
+   "db_size_mb": 32.0,
+   "top_statements": [
+    {
+     "query": "insert into m6.likes (author_id, post_id, liker_id) values ($1,$2,$3) on conflict do nothi",
+     "calls": 27230,
+     "total_exec_ms": 1933.6,
+     "mean_exec_ms": 0.071,
+     "rows": 21869,
+     "wal_bytes": 7238633.0
+    },
+    {
+     "query": "select u.id, u.display_name from m6.sessions s join m6.users u on u.id = s.user_id where s",
+     "calls": 420,
+     "total_exec_ms": 17.3,
+     "mean_exec_ms": 0.041,
+     "rows": 420,
+     "wal_bytes": 0.0
+    }
+   ]
+  }
+ },
+ "db_host": {
+  "shard_0": {
+   "cpu_busy_pct": 8.8,
+   "cpu_iowait_pct": 15.4,
+   "ncpu": 2,
+   "disk_write_mb_s": 7.63,
+   "disk_writes_per_s": 727.0,
+   "disk_busy_pct": 69.7,
+   "load1_end": 1.01
+  },
+  "shard_1": {
+   "cpu_busy_pct": 9.4,
+   "cpu_iowait_pct": 13.8,
+   "ncpu": 2,
+   "disk_write_mb_s": 8.38,
+   "disk_writes_per_s": 656.5,
+   "disk_busy_pct": 65.0,
+   "load1_end": 2.94
+  }
+ }
+}

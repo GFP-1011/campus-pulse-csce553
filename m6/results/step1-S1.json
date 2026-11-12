@@ -1,0 +1,87 @@
+{
+ "shard_0": {
+  "writes": [],
+  "top": [
+   [
+    "select post_created_at, remote_followers from m6.publish_post($1, $2, $3, $4)",
+    81792,
+    1261903.0,
+    "15.428",
+    81792,
+    "1529111828"
+   ],
+   [
+    "select coalesce(wait_event_type,$1), coalesce(wait_event,$2), count(*) from pg_s",
+    251,
+    4720.0,
+    "18.805",
+    450,
+    "0"
+   ],
+   [
+    "truncate m6.feed_items, m6.likes, m6.post_tags, m6.posts",
+    8,
+    3462.0,
+    "432.702",
+    0,
+    "171223"
+   ],
+   [
+    "SELECT * FROM pgbouncer.get_auth($1)",
+    55,
+    2805.0,
+    "50.998",
+    55,
+    "0"
+   ],
+   [
+    "select u.id, u.display_name from m6.sessions s join m6.users u on u.id = s.user_",
+    4556,
+    2604.0,
+    "0.571",
+    4556,
+    "0"
+   ],
+   [
+    "DISCARD ALL",
+    33,
+    776.0,
+    "23.510",
+    0,
+    "0"
+   ],
+   [
+    "select queryid::text, left(regexp_replace(query, $1, $2, $3), $4), calls, total_",
+    16,
+    732.0,
+    "45.780",
+    90,
+    "0"
+   ],
+   [
+    "select pg_database_size($1)",
+    16,
+    253.0,
+    "15.783",
+    16,
+    "0"
+   ],
+   [
+    "analyze m6.posts",
+    8,
+    180.0,
+    "22.445",
+    0,
+    "10370"
+   ],
+   [
+    "select xact_commit, xact_rollback, tup_inserted, tup_updated, tup_deleted, blks_",
+    16,
+    92.0,
+    "5.779",
+    16,
+    "0"
+   ]
+  ]
+ }
+}

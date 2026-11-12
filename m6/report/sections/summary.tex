@@ -1,0 +1,20 @@
+\section*{Summary}
+\begin{itemize}[nosep,leftmargin=1.2em]
+\item \textbf{Write bottleneck.} We extended Campus Pulse so that one ``publish'' writes 46 rows: the post, its
+      hashtags, a real-time full-text (GIN) index entry, and home-feed copies for the author and 40 followers. On one Supabase
+      Nano database, publish throughput peaked at \textbf{574 posts/s} (25.6k rows/s) at 64 clients and then
+      \emph{declined} to about 500 posts/s, with p99 up to 2.9~s. At the peak the database had all 15 pooled
+      server connections busy, mean \texttt{publish\_post()} time had risen 5$\times$ (3.4 to 16.8~ms), 3--4
+      backends were waiting on WAL write/flush, and the VM was about 80\% busy+iowait. The same API served 1{,}571 feed reads/s, so the API was not the limit.
+\item \textbf{Shard key and models.} We chose the owning user's id (UUID) hashed into 64 buckets
+      (Section~\ref{sec:worksheet}). The integer M1 schema became a UUID schema in which every child row carries its
+      owner, with follow edges on both sides, feed copies on the reader's shard, and a directory (email $\to$ id) and a
+      bucket map on shard\_0 (Section~\ref{sec:models}).
+\item \textbf{Ten steps} implemented on two us-west-2 Supabase projects with the adapted handout SQL
+      (Section~\ref{sec:steps}). Checks: 181/219 users per shard, 0 rows on the wrong shard, the wrong-bucket insert was rejected, and 16/16 end-to-end API checks of the Step~9--10 write and read paths pass.
+\item \textbf{After sharding.} Peak \textbf{744 posts/s} (1.30$\times$), with a median of 700 vs.\ 501 posts/s over the
+      saturated stages (1.40$\times$). At equal throughput each shard carries about half the rows and runs
+      \texttt{publish\_post()} about 5$\times$ faster. The gain is below 2$\times$ because cross-shard feed copies keep one commit
+      per post on \emph{each} shard, and because the second round trip doubles latency at low load
+      (p50 78 $\to$ 153~ms). Likes, which touch one owner, gained 21\% and lost their commit waits.
+\end{itemize}

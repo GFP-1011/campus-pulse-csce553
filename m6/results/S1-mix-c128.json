@@ -1,0 +1,105 @@
+{
+ "label": "S1-mix-c128",
+ "shards": 1,
+ "workload": "mix",
+ "concurrency": 128,
+ "started_utc": "2026-11-10T23:27:23.759996+00:00",
+ "duration_s": 30.148,
+ "attempts": 46818,
+ "successes": 46818,
+ "errors": 0,
+ "error_rate": 0.0,
+ "rps_success": 1552.923,
+ "mean_ms": 81.74,
+ "p50_ms": 76.21,
+ "p95_ms": 109.86,
+ "p99_ms": 149.6,
+ "max_ms": 247.4,
+ "by_kind": {
+  "feed:ok": 32664,
+  "like:ok": 9449,
+  "post:ok": 4705
+ },
+ "ok_by_user_shard": {
+  "shard_0": 46818
+ },
+ "error_codes": {},
+ "api_cpu_mean_pct": 212.5,
+ "api_cpu_max_pct": 233.8,
+ "api_rss_max_mib": 469.2,
+ "db_active_backends_mean": {
+  "shard_0": 2.9
+ },
+ "db_top_waits": {
+  "shard_0": {
+   "CPU:running": 1.86,
+   "IO:WalSync": 0.57,
+   "LWLock:WALWrite": 0.29,
+   "Client:ClientRead": 0.19
+  }
+ },
+ "db": {
+  "shard_0": {
+   "xact_commit": 47771,
+   "xact_rollback": 0,
+   "tup_inserted": 217916,
+   "tup_updated": 14,
+   "tup_deleted": 5,
+   "blks_read": 0,
+   "blks_hit": 3987798,
+   "wal_records": 714000,
+   "wal_bytes": 88781658.0,
+   "wal_buffers_full": 0,
+   "db_exec_s_per_s": 0.932,
+   "commits_per_s": 1584.5,
+   "rows_inserted_per_s": 7228.1,
+   "wal_mb_per_s": 2.945,
+   "db_size_mb": 143.3,
+   "top_statements": [
+    {
+     "query": "select post_created_at, remote_followers from m6.publish_post($1, $2, $3, $4)",
+     "calls": 4705,
+     "total_exec_ms": 20751.1,
+     "mean_exec_ms": 4.41,
+     "rows": 4705,
+     "wal_bytes": 84900148.0
+    },
+    {
+     "query": "select post_id, author_id, preview, created_at from m6.feed_items where owner_id = $1 orde",
+     "calls": 32664,
+     "total_exec_ms": 6079.2,
+     "mean_exec_ms": 0.186,
+     "rows": 1633197,
+     "wal_bytes": 0.0
+    },
+    {
+     "query": "insert into m6.likes (author_id, post_id, liker_id) values ($1,$2,$3) on conflict do nothi",
+     "calls": 9449,
+     "total_exec_ms": 1233.0,
+     "mean_exec_ms": 0.13,
+     "rows": 7930,
+     "wal_bytes": 2560892.0
+    },
+    {
+     "query": "select u.id, u.display_name from m6.sessions s join m6.users u on u.id = s.user_id where s",
+     "calls": 764,
+     "total_exec_ms": 30.4,
+     "mean_exec_ms": 0.04,
+     "rows": 764,
+     "wal_bytes": 0.0
+    }
+   ]
+  }
+ },
+ "db_host": {
+  "shard_0": {
+   "cpu_busy_pct": null,
+   "cpu_iowait_pct": null,
+   "ncpu": 2,
+   "disk_write_mb_s": 0.0,
+   "disk_writes_per_s": 0.0,
+   "disk_busy_pct": 0.0,
+   "load1_end": 2.25
+  }
+ }
+}

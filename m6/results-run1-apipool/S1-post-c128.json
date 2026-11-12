@@ -1,0 +1,91 @@
+{
+ "label": "S1-post-c128",
+ "shards": 1,
+ "workload": "post",
+ "concurrency": 128,
+ "started_utc": "2026-11-10T22:49:46.627390+00:00",
+ "duration_s": 31.015,
+ "attempts": 9582,
+ "successes": 9582,
+ "errors": 0,
+ "error_rate": 0.0,
+ "rps_success": 308.949,
+ "mean_ms": 405.46,
+ "p50_ms": 154.7,
+ "p95_ms": 1124.08,
+ "p99_ms": 1607.52,
+ "max_ms": 2091.82,
+ "by_kind": {
+  "post:ok": 9582
+ },
+ "ok_by_user_shard": {
+  "shard_0": 9582
+ },
+ "error_codes": {},
+ "api_cpu_mean_pct": 49.2,
+ "api_cpu_max_pct": 62.5,
+ "api_rss_max_mib": 575.5,
+ "db_active_backends_mean": {
+  "shard_0": 4.0
+ },
+ "db_top_waits": {
+  "shard_0": {
+   "CPU:running": 2.26,
+   "LWLock:WALWrite": 0.67,
+   "IO:WalSync": 0.59,
+   "LWLock:BufferContent": 0.26,
+   "IO:SlruWrite": 0.07,
+   "LWLock:MultiXactGen": 0.07,
+   "IO:WalWrite": 0.04,
+   "IO:DataFileExtend": 0.04
+  }
+ },
+ "db": {
+  "shard_0": {
+   "xact_commit": 10319,
+   "xact_rollback": 0,
+   "tup_inserted": 428880,
+   "tup_updated": 0,
+   "tup_deleted": 0,
+   "blks_read": 0,
+   "blks_hit": 6151629,
+   "wal_records": 1385249,
+   "wal_bytes": 176751120.0,
+   "wal_buffers_full": 0,
+   "db_exec_s_per_s": 1.626,
+   "commits_per_s": 332.7,
+   "rows_inserted_per_s": 13828.2,
+   "wal_mb_per_s": 5.699,
+   "db_size_mb": 163.8,
+   "top_statements": [
+    {
+     "query": "select post_created_at, remote_followers from m6.publish_post($1, $2, $3, $4)",
+     "calls": 9582,
+     "total_exec_ms": 50334.0,
+     "mean_exec_ms": 5.253,
+     "rows": 9582,
+     "wal_bytes": 180719228.0
+    },
+    {
+     "query": "select u.id, u.display_name from m6.sessions s join m6.users u on u.id = s.user_id where s",
+     "calls": 797,
+     "total_exec_ms": 87.5,
+     "mean_exec_ms": 0.11,
+     "rows": 797,
+     "wal_bytes": 0.0
+    }
+   ]
+  }
+ },
+ "db_host": {
+  "shard_0": {
+   "cpu_busy_pct": 31.9,
+   "cpu_iowait_pct": 15.8,
+   "ncpu": 2,
+   "disk_write_mb_s": 21.37,
+   "disk_writes_per_s": 1030.0,
+   "disk_busy_pct": 97.9,
+   "load1_end": 1.94
+  }
+ }
+}

@@ -1,0 +1,97 @@
+{
+ "label": "S1-post-c128",
+ "shards": 1,
+ "workload": "post",
+ "concurrency": 128,
+ "started_utc": "2026-11-10T23:22:38.821559+00:00",
+ "duration_s": 31.351,
+ "attempts": 16376,
+ "successes": 16376,
+ "errors": 0,
+ "error_rate": 0.0,
+ "rps_success": 522.341,
+ "mean_ms": 240.46,
+ "p50_ms": 183.36,
+ "p95_ms": 502.91,
+ "p99_ms": 1197.81,
+ "max_ms": 3343.67,
+ "by_kind": {
+  "post:ok": 16376
+ },
+ "ok_by_user_shard": {
+  "shard_0": 16376
+ },
+ "error_codes": {},
+ "api_cpu_mean_pct": 51.8,
+ "api_cpu_max_pct": 90.0,
+ "api_rss_max_mib": 452.2,
+ "db_active_backends_mean": {
+  "shard_0": 15.06
+ },
+ "db_top_waits": {
+  "shard_0": {
+   "CPU:running": 7.47,
+   "LWLock:WALWrite": 3.0,
+   "LWLock:BufferContent": 2.09,
+   "IO:WalSync": 0.5,
+   "Lock:extend": 0.47,
+   "Client:ClientRead": 0.38,
+   "IO:DataFileWrite": 0.38,
+   "IO:DataFileExtend": 0.22,
+   "LWLock:LockManager": 0.22,
+   "IO:WalWrite": 0.16,
+   "IO:SlruWrite": 0.06,
+   "LWLock:MultiXactGen": 0.06,
+   "LWLock:BufferMapping": 0.03,
+   "LWLock:WALInsert": 0.03
+  }
+ },
+ "db": {
+  "shard_0": {
+   "xact_commit": 17312,
+   "xact_rollback": 0,
+   "tup_inserted": 755112,
+   "tup_updated": 0,
+   "tup_deleted": 0,
+   "blks_read": 7,
+   "blks_hit": 7645767,
+   "wal_records": 2542781,
+   "wal_bytes": 315672400.0,
+   "wal_buffers_full": 0,
+   "db_exec_s_per_s": 11.737,
+   "commits_per_s": 552.2,
+   "rows_inserted_per_s": 24085.6,
+   "wal_mb_per_s": 10.069,
+   "db_size_mb": 269.1,
+   "top_statements": [
+    {
+     "query": "select post_created_at, remote_followers from m6.publish_post($1, $2, $3, $4)",
+     "calls": 16376,
+     "total_exec_ms": 367625.9,
+     "mean_exec_ms": 22.449,
+     "rows": 16376,
+     "wal_bytes": 310214571.0
+    },
+    {
+     "query": "select u.id, u.display_name from m6.sessions s join m6.users u on u.id = s.user_id where s",
+     "calls": 634,
+     "total_exec_ms": 351.2,
+     "mean_exec_ms": 0.554,
+     "rows": 634,
+     "wal_bytes": 0.0
+    }
+   ]
+  }
+ },
+ "db_host": {
+  "shard_0": {
+   "cpu_busy_pct": 46.8,
+   "cpu_iowait_pct": 27.1,
+   "ncpu": 2,
+   "disk_write_mb_s": 40.56,
+   "disk_writes_per_s": 2275.2,
+   "disk_busy_pct": 166.7,
+   "load1_end": 10.57
+  }
+ }
+}
